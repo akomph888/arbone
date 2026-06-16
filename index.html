@@ -3,497 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnatoAR Clinical Dashboard - นวัตกรรมการเรียนรู้กายวิภาคศาสตรคลินิกสำหรับพยาบาลศาสตร์</title>
+    <title>AnatoAR Clinical B.S.N. Research Dashboard</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Thai & English -->
+    <!-- Google Fonts for Medical Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
-    <!-- MediaPipe Hands & Camera Utils -->
+    <!-- MediaPipe Hands & Camera Helper -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
     <style>
         body {
-            font-family: 'Kanit', sans-serif;
+            font-family: 'Chakra Petch', sans-serif;
         }
         .mono {
             font-family: 'Share Tech Mono', monospace;
         }
         @keyframes scan {
-            0% { transform: translateY(-5%); opacity: 0.3; }
-            50% { transform: translateY(105%); opacity: 0.8; }
-            100% { transform: translateY(-5%); opacity: 0.3; }
+            0% { transform: translateY(-5%); }
+            50% { transform: translateY(105%); }
+            100% { transform: translateY(-5%); }
         }
         .scan-line {
-            animation: scan 5s linear infinite;
-        }
-        .medical-grid {
-            background-size: 24px 24px;
-            background-image: linear-gradient(to right, rgba(6, 182, 212, 0.04) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
+            animation: scan 4s linear infinite;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 overflow-hidden h-full flex flex-col select-none medical-grid">
+<body class="bg-slate-950 text-slate-100 overflow-hidden h-full flex flex-col select-none">
 
-    <!-- บล็อกแสดงสถานะการโหลดโมเดล AI -->
+    <!-- หน้าจอแสดงผลระหว่างรอระบบโหลดปัญญาประดิษฐ์ (MediaPipe Loading Screen) -->
     <div id="loading-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center">
         <div class="relative w-28 h-28 mb-6">
-            <div class="absolute inset-0 rounded-full border-4 border-cyan-500/10 border-t-emerald-500 animate-spin" style="animation-duration: 1.5s;"></div>
-            <div class="absolute inset-2 rounded-full border-4 border-emerald-500/5 border-b-cyan-500 animate-spin" style="animation-direction: reverse; animation-duration: 2s;"></div>
-            <div class="absolute inset-4 flex items-center justify-center">
-                <svg class="w-10 h-10 text-emerald-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                </svg>
+            <div class="absolute inset-0 rounded-full border-4 border-teal-500/10 border-t-teal-400 animate-spin"></div>
+            <div class="absolute inset-2 rounded-full border-4 border-fuchsia-500/10 border-b-fuchsia-400 animate-spin" style="animation-direction: reverse;"></div>
+            <div class="absolute inset-6 flex items-center justify-center text-teal-400">
+                <svg class="w-10 h-10 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             </div>
         </div>
-        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2">ANATOAR CLINICAL INTERACTIVE</h2>
-        <p class="text-slate-400 max-w-md text-sm mb-4">กำลังเตรียมโมเดลวิเคราะห์พิกัดมือประสาทสัมผัสและพิกัดกายวิภาคคลินิกสำหรับนักศึกษาพยาบาล...</p>
-        <div class="w-64 bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-            <div class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full w-0 animate-pulse" style="width: 70%"></div>
+        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 mb-2">AnatoAR Clinical Dashboard</h2>
+        <p class="text-slate-400 max-w-md text-sm mb-4 font-light">กำลังเชื่อมต่อกล้องและโมเดลประมวลผลข้อต่อกระดูกมือ AI เพื่อใช้ประเมินทักษะทางคลินิก...</p>
+        <div class="w-64 bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
+            <div class="bg-teal-500 h-full w-0 animate-pulse" style="width: 80%"></div>
         </div>
     </div>
 
-    <!-- ส่วนหัวหน้าจอ (Clinical Dashboard Header) -->
-    <header class="bg-slate-900/90 border-b border-slate-800 py-3 px-6 flex justify-between items-center z-10 shrink-0 backdrop-blur-md">
+    <!-- แผงบนสุด (Header / Telemetry indicators) -->
+    <header class="bg-slate-900 border-b border-slate-800 py-2.5 px-6 flex justify-between items-center z-10 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="bg-emerald-500/10 p-2.5 rounded-xl text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.871 4A17.926 17.926 0 003 12c0 2.871.67 5.585 1.871 8m14.13 0a17.93 17.93 0 001.87-8c0-2.871-.67-5.585-1.87-8M9 9h1.246a1 1 0 01.961.725l1.586 5.55a1 1 0 00.961.725H15m1-7h2m-2 4h2m-3 4h3M5 8h2m-2 4h2m-2 4h2"></path>
-                </svg>
+            <div class="bg-teal-500/10 p-2 rounded-lg text-teal-400 border border-teal-500/20">
+                <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
             </div>
             <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="text-lg font-bold tracking-wider text-white">AnatoAR <span class="text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">B.S.N. Clinical</span></h1>
-                </div>
-                <p class="text-[11px] text-slate-400 uppercase tracking-widest font-medium">ระบบวิเคราะห์จุดแลนด์มาร์กกระดูกเพื่อการพยาบาลและการประเมินทางคลินิก</p>
+                <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 leading-tight">AnatoAR Clinical Nursing Dashboard</h1>
+                <p class="text-[11px] text-slate-400 tracking-wide uppercase">ระบบเรียนรู้ทางคลินิกและจัดเก็บบันทึกผลงานวิจัยพฤติกรรมพยาบาล (B.S.N.)</p>
             </div>
         </div>
-        
-        <!-- ตัวเลือกโหมดอินพุต -->
-        <div class="flex items-center gap-3 bg-slate-950 p-1 rounded-lg border border-slate-800">
-            <button id="btn-ar-mode" class="px-3 py-1.5 rounded-md text-xs font-semibold transition duration-200 bg-emerald-600 text-white shadow-lg shadow-emerald-900/40 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-350 animate-ping"></span>
-                <span>AR Hand-Tracking</span>
+
+        <!-- แท็บสลับโหมดและตัวชี้วัดความพร้อมของกล้อง -->
+        <div class="flex items-center gap-2">
+            <div class="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-850 flex items-center gap-2 text-xs">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+                <span class="text-slate-400">สถานะระบบวิจัย:</span>
+                <span id="header-status-tag" class="font-bold text-emerald-400 mono">READY</span>
+            </div>
+            <button id="btn-ar-mode" class="px-2.5 py-1.5 rounded bg-cyan-950 border border-cyan-500/30 text-xs font-semibold text-cyan-400 transition hover:bg-cyan-900/40">
+                📷 โหมดกล้อง AR
             </button>
-            <button id="btn-mouse-mode" class="px-3 py-1.5 rounded-md text-xs font-medium transition duration-200 text-slate-400 hover:text-white flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                <span>Mouse / Touch Simulator</span>
+            <button id="btn-mouse-mode" class="px-2.5 py-1.5 rounded bg-slate-800 text-xs font-semibold text-slate-300 transition hover:bg-slate-750">
+                🖱️ โหมดเมาส์ / สัมผัส
             </button>
         </div>
     </header>
 
-    <!-- หน้าต่างแล็บหลัก -->
-    <main class="flex-1 flex flex-col md:flex-row relative overflow-hidden">
+    <!-- พื้นที่หน้าจอหลักแบ่งฝั่งกล้อง AR (ซ้าย) และ แผงประเมินกรณีศึกษา (ขวา) -->
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         
-        <!-- พื้นที่แสดงกล้อง AR และ Canvas เล่นเกม (ฝั่งซ้าย) -->
-        <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden min-h-[400px]">
+        <!-- ส่วนที่ 1: หน้าจอแสดงผลกล้อง AR และโครงกระดูก (ฝั่งซ้าย) -->
+        <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden min-h-[380px]">
             <video id="webcam" class="hidden" autoplay playsinline></video>
-            
-            <!-- Canvas หลักสำหรับการเรนเดอร์ภาพจากกล้อง, ข้อต่อกระดูกมือ และแลนด์มาร์กทางการแพทย์ -->
             <canvas id="game-canvas" class="absolute inset-0 w-full h-full object-cover z-0"></canvas>
             
-            <!-- เส้นสแกน Sci-Fi ไฮเทค -->
-            <div class="absolute inset-x-0 h-[1.5px] bg-emerald-500/30 shadow-[0_0_10px_#10b981] scan-line pointer-events-none z-1"></div>
-            
-            <!-- การแจ้งเตือนสถานะเมื่อกล้องเปิดไม่ได้ -->
-            <div id="camera-error-toast" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 max-w-sm bg-red-950/90 backdrop-blur border border-red-500/40 p-4 rounded-xl text-center shadow-2xl">
-                <svg class="w-10 h-10 text-red-400 mx-auto mb-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                <h4 class="text-sm font-semibold text-red-200 mb-1">ไม่พบการเชื่อมต่ออุปกรณ์กล้อง</h4>
-                <p class="text-xs text-red-400 mb-3">แต่คุณสามารถเปลี่ยนมาเปิดใช้งาน "โหมดจำลองด้วยเมาส์" เพื่อประเมินแลนด์มาร์กทางการพยาบาลต่อได้ทันที</p>
-                <button onclick="document.getElementById('camera-error-toast').classList.add('hidden')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">เปิดใช้โหมดเมาส์สำรอง</button>
+            <!-- เอฟเฟกต์เส้นสแกนสไตล์ Sci-Fi -->
+            <div class="absolute inset-x-0 h-[1.5px] bg-teal-400/60 shadow-[0_0_12px_rgba(45,212,191,0.8)] scan-line pointer-events-none z-1"></div>
+
+            <!-- คำอธิบายปุ่มโต้ตอบด่วน -->
+            <div class="absolute bottom-3 left-3 z-10 max-w-[280px] bg-slate-950/90 border border-teal-500/20 p-3 rounded-lg shadow-2xl backdrop-blur">
+                <h4 class="text-[11px] font-bold text-teal-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                    🎯 คู่มือการคุมด้วยท่าทาง AR
+                </h4>
+                <ul class="text-[10px] text-slate-300 space-y-1 list-disc list-inside">
+                    <li>เลื่อน <span class="text-cyan-400 font-semibold">เป้าชี้สีฟ้า (ปลายนิ้วชี้)</span> ทับป้ายกระดูก</li>
+                    <li><span class="text-teal-400 font-semibold">จีบนิ้วชี้+นิ้วโป้ง</span> เข้าหากันค้างไว้ เพื่อหนีบยกป้าย</li>
+                    <li>ลากไปปล่อยทับ <span class="text-cyan-400 font-semibold">เป้ากลม ⊕</span> บนโครงร่างร่างกาย</li>
+                </ul>
             </div>
 
-            <!-- คำแนะนำการทำหัตถการ AR (HUD Overlays) -->
-            <div id="tutorial-card" class="absolute bottom-4 left-4 z-10 max-w-xs bg-slate-950/90 border border-slate-800 p-3.5 rounded-xl shadow-2xl backdrop-blur-md">
-                <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
-                    วิธีกระทำหัตถการในโหมด AR
-                </h4>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                    1. ขยับฝ่ามือขึ้นมาในจอ เล็ง <span class="text-cyan-400 font-semibold">เป้าสีเขียว (ปลายนิ้วชี้)</span> ไปทับการ์ดคำศัพท์<br>
-                    2. <span class="text-emerald-400 font-semibold">จีบนิ้วโป้งและนิ้วชี้</span> เข้าหากันค้างไว้ เพื่อคีบหยิบการ์ดคำศัพท์<br>
-                    3. ลากป้ายคำศัพท์ไปวางทับ <span class="text-fuchsia-400 font-semibold">เป้าสแกน ⊕</span> บนโครงกระดูกพยาบาลให้ถูกชิ้นกายวิภาค แล้วปล่อยนิ้ว!
-                </p>
+            <!-- กล่องแสดงตัวชี้วัดสถิติพฤติกรรมเรียลไทม์ (Research Metrics Telemetry) -->
+    <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+        <div class="bg-slate-900/95 border border-slate-800 rounded-lg p-3 grid grid-cols-3 gap-4 min-w-[280px]">
+            <div>
+                <span class="text-[9px] text-slate-400 uppercase block">อัตราตอบถูก</span>
+                <span id="stat-accuracy" class="text-lg font-bold text-emerald-400 mono leading-none">0%</span>
+            </div>
+            <div class="border-l border-slate-800 pl-3">
+                <span class="text-[9px] text-slate-400 uppercase block">ทำพลาดสะสม</span>
+                <span id="stat-errors" class="text-lg font-bold text-rose-400 mono leading-none">0 ครั้ง</span>
+            </div>
+            <div class="border-l border-slate-800 pl-3">
+                <span class="text-[9px] text-slate-400 uppercase block">ระยะเวลารวม</span>
+                <span id="stat-duration" class="text-lg font-bold text-cyan-400 mono leading-none">0s</span>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- ฝั่งขวา: Clinical Dashboard Panel (แผงควบคุมสรีรวิทยาคลินิก) -->
-        <div class="w-full md:w-[420px] bg-slate-900 border-t md:border-t-0 md:border-l border-slate-800 flex flex-col shrink-0 z-10 overflow-y-auto">
+<!-- ส่วนที่ 2: แผงประเมินผลทางการพยาบาลเชิงวิชาการ (ฝั่งขวา) -->
+        <div class="w-full lg:w-[410px] bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 z-10 overflow-y-auto">
             
-            <!-- ส่วนสลับโหมดวิชาการ (Academic Modes) -->
-            <div class="p-4 border-b border-slate-800 bg-slate-950/30">
-                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2.5">Academic Evaluation Modes</h3>
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-mode-study" class="py-2.5 px-3 rounded-lg text-xs font-bold text-center border transition-all duration-200 bg-emerald-950/30 border-emerald-500/40 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)] flex items-center justify-center gap-1.5">
-                        🧬 1. Anatomy Atlas
-                    </button>
-                    <button id="btn-mode-game" class="py-2.5 px-3 rounded-lg text-xs font-bold text-center border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200 transition-all duration-200 flex items-center justify-center gap-1.5">
-                        🏥 2. Clinical Case Study
-                    </button>
+            <!-- สเตจวิเคราะห์กรณีศึกษา (Nursing Case Scenario) -->
+            <div class="p-4 bg-teal-950/20 border-b border-teal-500/20">
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-[10px] font-bold text-cyan-400 bg-cyan-950 border border-cyan-800 px-2 py-0.5 rounded uppercase tracking-wider">Clinical Case Study</span>
+                    <span id="case-index" class="text-xs font-bold text-slate-400 font-mono">Case 1 / 6</span>
                 </div>
-            </div>
-
-            <!-- กล่องแสดงกรณีศึกษาทางคลินิกจริง (Clinical Scenario Panel) -->
-            <div id="clinical-case-box" class="hidden p-4 bg-emerald-950/10 border-b border-slate-800">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded uppercase tracking-wider">Clinical Scenario B.S.N.</span>
-                    <span class="text-[10px] text-slate-400 mono" id="case-counter">Case 1 / 4</span>
-                </div>
-                <h4 id="case-title" class="text-sm font-bold text-white mb-1.5 leading-relaxed">กรณีศึกษาการบริหารยาทางหน้าขา (IM Vastus Lateralis)</h4>
-                <p id="case-question" class="text-[11px] text-slate-350 leading-relaxed bg-slate-950/60 p-3 rounded-lg border border-slate-800 mb-2">
-                    คนไข้เด็กชายอายุ 4 ปี ต้องได้รับยาปฏิชีวนะเข้ากล้ามเนื้ออย่างเร่งด่วน พยาบาลวิชาชีพประเมินเลือกตำแหน่ง Vastus Lateralis Site ในการบริหารยาเพื่อความปลอดภัย จงหยิบและนำการ์ดของกระดูกชิ้นดังกล่าวไปติดตั้งให้ถูกต้องบนโครงร่างกายวิภาค
+                <h3 id="case-title" class="text-sm font-bold text-white mb-1">... กำลังโหลดข้อมูลกรณีศึกษา ...</h3>
+                <p id="case-scenario" class="text-[11.5px] text-slate-300 leading-relaxed bg-slate-950/75 p-3 rounded border border-slate-850">
+                    ...
                 </p>
-                <div class="flex justify-between items-center bg-slate-950/40 px-3 py-1.5 rounded border border-slate-800/80 text-[10px]">
-                    <span class="text-slate-400">เป้าหมายที่ต้องระบุ:</span>
-                    <span id="case-target-label" class="text-cyan-400 font-bold tracking-wide">Femur (กระดูกต้นขา)</span>
-                </div>
             </div>
 
-            <!-- กล่องแสดงข้อมูลกายวิภาคเชิงลึกและการนำไปประยุกต์ใช้ในการพยาบาล (Nursing Application & Fact Sheet) -->
-            <div id="clinical-fact-box" class="p-4 bg-slate-950/40 border-b border-slate-800 flex-1 flex flex-col justify-between min-h-[180px]">
+            <!-- ตารางสั่นสัญญาณแจ้งเตือนอันตรายทางสรีรวิทยา (Nursing Hazard Display) -->
+            <div id="hazard-telemetry-panel" class="p-4 bg-slate-950/75 border-b border-slate-850 flex-1 flex flex-col justify-between min-h-[170px]">
                 <div>
                     <div class="flex justify-between items-start mb-2">
-                        <span class="text-[9px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded uppercase tracking-wider">NURSING CLINICAL NOTES</span>
-                        <span id="fact-latin" class="text-xs font-mono text-slate-400 italic">Osteology & Surface Landmarks</span>
+                        <span class="text-[9px] font-bold text-rose-500 bg-rose-950/50 border border-rose-900/30 px-2 py-0.5 rounded uppercase">Clinical Alert & Hazards</span>
+                        <span id="hazard-impact" class="text-[10px] font-medium text-rose-400">Waiting for response...</span>
                     </div>
-                    <h3 id="fact-title" class="text-base font-bold text-white mb-1.5">กระดูกและพื้นผิวกายวิภาคคลินิก</h3>
-                    <p id="fact-desc" class="text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">โปรดสลับโหมดการทดสอบ หรือเลือกหยิบจับการ์ดคำศัพท์เพื่อเริ่มต้นแสดงข้อมูลเชิงพยาธิสภาพ คลินิก และข้อควรระวังในการพยาบาลที่เกี่ยวข้องกับกระดูกแต่ละส่วนทันที</p>
+                    <h3 id="hazard-title" class="text-xs font-bold text-white mb-1.5 uppercase tracking-wide">ภัยคุกคามทางสรีรวิทยาและข้อผิดพลาดหัตถการ</h3>
+                    <p id="hazard-desc" class="text-[11px] text-slate-400 leading-relaxed italic">
+                        "กรุณาวิเคราะห์โจทย์เคสข้างต้นและเลือกหยิบกระดูกโครงร่างที่เป็น 'แลนด์มาร์กอ้างอิงทางการพยาบาล' ที่ถูกต้อง เพื่อหลีกเลี่ยงภาวะแทรกซ้อนที่อาจเป็นอันตรายแก่ชีวิตผู้ป่วย..."
+                    </p>
                 </div>
                 
-                <div id="telemetry-panel" class="mt-4 pt-3 border-t border-slate-800 grid grid-cols-2 gap-2 text-[10px]">
-                    <div class="bg-slate-950 p-2 rounded border border-slate-850">
-                        <span class="text-slate-500 uppercase tracking-wider block">IM Landmarking:</span>
-                        <span id="tel-im-site" class="text-emerald-400 font-semibold">- No active bone selected -</span>
+                <div class="mt-4 pt-3 border-t border-slate-850 flex items-center justify-between">
+                    <div class="flex items-center gap-1.5 text-xs text-slate-400">
+                        <span class="w-2.5 h-2.5 rounded bg-amber-500 inline-block"></span>
+                        <span>ความสุ่มเสี่ยงความปลอดภัยทางคลินิก:</span>
                     </div>
-                    <div class="bg-slate-950 p-2 rounded border border-slate-850">
-                        <span class="text-slate-500 uppercase tracking-wider block">Clinical Hazard:</span>
-                        <span id="tel-hazard" class="text-red-400 font-semibold">N/A</span>
-                    </div>
+                    <span id="hazard-level" class="text-xs font-bold text-amber-400 uppercase tracking-widest font-mono">PENDING</span>
                 </div>
             </div>
 
-            <!-- แผงรายการชิ้นกระดูกสำหรับการทดสอบลากวาง (Vocabulary Palette) -->
+            <!-- ส่วนของแผงเลือกป้ายคำศัพท์และปุ่มฟังก์ชันการส่งออกวิจัย -->
             <div class="p-4 flex-1">
-                <div class="flex justify-between items-center mb-2.5">
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bone Labels Palette</h3>
-                    <span id="placed-counter" class="text-[10px] bg-slate-950 px-2.5 py-0.5 rounded-full border border-slate-800 text-slate-400">วางผ่าน 0 / 10 ชิ้น</span>
-                </div>
-                <div id="bone-palette" class="grid grid-cols-2 gap-2 max-h-[220px] md:max-h-none overflow-y-auto pr-1">
-                    <!-- จะเรนเดอร์อัตโนมัติผ่าน JavaScript -->
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">คลังชิ้นกระดูกสำคัญ</h3>
+                    <span id="placed-counter" class="text-[10px] bg-slate-950 border border-slate-850 px-2 py-0.5 rounded text-slate-400 mono">0 / 6 COMPLETED</span>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-2 mt-4">
-                    <button id="btn-reset" class="py-2 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 3.56L18 7M7 9H4v3"></path></svg>
-                        Reset Board
-                    </button>
-                    <button id="btn-skip-case" class="hidden py-2 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
-                        Skip Scenario ➜
-                    </button>
+                <div id="bone-palette" class="grid grid-cols-2 gap-1.5 max-h-[160px] lg:max-h-none overflow-y-auto pr-1">
+                    <!-- จะเรนเดอร์รายการด้วย JavaScript อัตโนมัติ -->
                 </div>
-            </div>
-            
-            <div class="p-3 bg-slate-950 border-t border-slate-850 text-center text-[10px] text-slate-500">
-                วิชากายวิภาคศาสตร์เชิงลึกร่วมคลินิกการพยาบาล • Nursing Science Platform
+
+                <!-- ปุ่มส่งออกข้อมูลสำหรับทำวิจัยพฤติกรรมเพื่อการวิเคราะห์ทางสถิติ -->
+                <div class="mt-4 pt-3 border-t border-slate-800 space-y-2">
+                    <button id="btn-export-data" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-lg transition shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-1.5">
+                        📥 ส่งออกข้อมูลวิจัยระดับวิชาการ (.CSV)
+                    </button>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button id="btn-reset" class="py-1.5 bg-slate-950 border border-slate-800 text-[10px] font-medium rounded text-slate-400 hover:text-white transition">
+                            🔄 รีเซ็ตระบบใหม่ทั้งหมด
+                        </button>
+                        <button id="btn-skip" class="py-1.5 bg-slate-950 border border-slate-800 text-[10px] font-medium rounded text-slate-400 hover:text-white transition">
+                            ⏭️ ข้ามกรณีศึกษาถัดไป
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- โมดอลแจ้งผลกรณีศึกษาสำเร็จ (Modal) -->
-    <div id="success-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
+    <!-- ป๊อปอัปรายงานวิจัยส่วนบุคคลหลังจบภารกิจ (Research Result Modal) -->
+    <div id="success-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-40 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative overflow-hidden">
+            <h2 class="text-xl font-bold text-white mb-1.5">🔬 สรุปบันทึกรายงานพฤติกรรมทางการพยาบาล</h2>
+            <p class="text-slate-400 text-[11px] mb-4">ระบบทำการบันทึกและประมวลผลวิจัยความแม่นยำและการรับมือความเสี่ยงของนักศึกษาพยาบาลเรียบร้อยแล้ว:</p>
             
-            <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            
-            <h2 class="text-2xl font-bold text-white mb-1">ยินดีด้วยอย่างยิ่ง! 🎉</h2>
-            <p class="text-slate-400 text-xs mb-6">คุณได้ทำการประเมินจุดแลนด์มาร์กกายวิภาคเพื่อการพยาบาลได้เสร็จสมบูรณ์!</p>
-            
-            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 grid grid-cols-3 gap-3 mb-4 text-center">
                 <div>
-                    <span class="text-[10px] text-slate-500 uppercase">ดัชนีคะแนนประเมิน</span>
-                    <div id="modal-score" class="text-3xl font-extrabold text-cyan-400 mono">000</div>
+                    <span class="text-[9px] text-slate-500 block uppercase">ความแม่นยำรวม</span>
+                    <div id="modal-accuracy" class="text-2xl font-bold text-emerald-400 mono">0%</div>
                 </div>
-                <div>
-                    <span class="text-[10px] text-slate-500 uppercase">เวลาที่ทำเสร็จจริง</span>
-                    <div id="modal-time" class="text-3xl font-extrabold text-emerald-400 mono">00:00</div>
+                <div class="border-l border-slate-850">
+                    <span class="text-[9px] text-slate-500 block uppercase">สุ่มพลาดรวม</span>
+                    <div id="modal-errors" class="text-2xl font-bold text-rose-400 mono">0 ครั้ง</div>
+                </div>
+                <div class="border-l border-slate-850">
+                    <span class="text-[9px] text-slate-500 block uppercase">เวลาที่ใช้จบกิจกรรม</span>
+                    <div id="modal-time" class="text-2xl font-bold text-cyan-400 mono">0s</div>
                 </div>
             </div>
 
-            <p id="evaluation-text" class="text-xs text-slate-300 italic mb-6">"ความเข้าใจกายวิภาคอย่างลึกซึ้งจะช่วยเพิ่มความปลอดภัยสูงสุดแก่ผู้รับบริการ"</p>
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg mb-6">
+                <span class="text-[10px] text-teal-400 font-bold block uppercase mb-1">📋 บทประเมินเพื่อการจัดระดับทักษะพยาบาล:</span>
+                <p id="evaluation-text" class="text-[11.5px] text-slate-300 leading-relaxed italic">
+                    ...กำลังประมวลความแม่นยำ...
+                </p>
+            </div>
 
-            <div class="flex gap-3">
-                <button id="btn-modal-restart" class="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold py-2.5 rounded-lg text-xs hover:shadow-lg hover:shadow-emerald-900/50 transition">ประเมินใหม่อีกรอบ</button>
-                <button onclick="document.getElementById('success-modal').classList.add('hidden')" class="px-4 bg-slate-850 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg text-xs font-semibold transition">ปิด</button>
+            <div class="flex gap-2">
+                <button id="btn-modal-export" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-2.5 rounded-lg text-xs hover:shadow-lg transition">
+                    ดาวน์โหลดตารางข้อมูลดิบเพื่อวิจัยวิจัย (.CSV)
+                </button>
+                <button onclick="document.getElementById('success-modal').classList.add('hidden')" class="px-4 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold transition">
+                    ปิดหน้าต่าง
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- โปรแกรมจัดการสถาปัตยกรรมข้อมูลวิทยาศาสตร์ (Anatomy Clinical Core Engine) -->
+    <!-- โค้ดกลไกควบคุมและประมวลผลทั้งหมดด้วยภาษา JavaScript -->
     <script>
-        // --- 1. คลังข้อมูลกายวิภาคศาสตร์เชิงลึกระดับอุดมศึกษา (Undergrad Level Clinical Anatomy) ---
+        // --- 1. แหล่งฐานข้อมูลคำศัพท์กระดูกและข้อบ่งชี้ทางคลินิก (Nursing Anatomy Dataset) ---
         const BONE_DATA = [
-            {
-                id: "skull",
-                nameTh: "กะโหลกศีรษะ",
-                nameEn: "Skull (Cranium)",
-                fact: "ประกอบด้วยกระดูกหน้า 14 ชิ้น และกระดูกศีรษะ 8 ชิ้น เชื่อมต่อด้วยรอยประสานชนิด Fibrous joint ที่เรียกว่า Sutures เป็นจุดสำคัญในการประเมินภาวะกะโหลกศีรษะยุบ (Depressed fracture) และการตรวจหา Fontanelle ในเด็กเล็ก",
-                imSite: "Not Applicable",
-                hazard: "Brain Herniation if ICP increases",
-                xRatio: 0.50,
-                yRatio: 0.12
-            },
             {
                 id: "clavicle",
                 nameTh: "กระดูกไหปลาร้า",
                 nameEn: "Clavicle",
-                fact: "กระดูกรูปตัว S ยาวแนวนอน มักเป็นกระดูกที่หักบ่อยที่สุดในร่างกาย (โดยเฉพาะส่วน 1/3 กลางจากการล้มเอาไหล่กระแทก) เป็นจุดแลนด์มาร์กสำคัญในการระบุตำแหน่งเพื่อแทงสายสวนเข้าหลอดเลือดดำใหญ่ใต้ไหปลาร้า (Subclavian Venous Catheter)",
-                imSite: "Not Recommended",
-                hazard: "Subclavian Artery Puncture / Pneumothorax",
-                xRatio: 0.39,
-                yRatio: 0.23
+                fact: "จุดอ้างอิงสำคัญในการแทงสายสวนเข้าเส้นเลือดใหญ่ใต้ไหปลาร้า (Subclavian Central Line Insertion)",
+                hazard: "ความผิดพลาดอาจทำให้ทิ่มทะลุปอด เกิดภาวะลมรั่ว (Pneumothorax) หรือเลือดออกในช่องอก (Hemothorax) เป็นอันตรายต่อชีวิต!",
+                xRatio: 0.38,
+                yRatio: 0.23,
+                hazardLevel: "CRITICAL"
             },
             {
                 id: "sternum",
                 nameTh: "กระดูกหน้าอก",
                 nameEn: "Sternum",
-                fact: "แบ่งเป็น 3 ส่วนหลัก: Manubrium, Body และ Xiphoid Process ตัวกระดูกเป็นจุดแลนด์มาร์กเกณฑ์มาตรฐานในการปฏิบัติการช่วยฟื้นคืนชีพ (CPR) โดยต้องกดหน้าอกระดับกึ่งกลางล่างของกระดูก Sternum (หลีกเลี่ยงการกด Xiphoid เพราะเสี่ยงตับฉีกขาด)",
-                imSite: "Not Applicable",
-                hazard: "Xiphoid Laceration (Liver rupture)",
+                fact: "จุดแลนด์มาร์กที่จำเป็นที่สุดในการทำ CPR โดยกดที่กระดูกอกส่วนล่าง (Lower Sternum) เพื่อบีบหัวใจปั๊มเลือดไหลเวียน",
+                hazard: "การลงน้ำหนักที่ผิดมาโดนลิ้นปี่ปลายสุด (Xiphoid Process) อาจกระแทกให้หักทะลุตับฉีกขาดตกเลือดรุนแรงเสียชีวิตได้!",
                 xRatio: 0.50,
-                yRatio: 0.27
-            },
-            {
-                id: "cervical",
-                nameTh: "กระดูกสันหลังคอ",
-                nameEn: "Cervical Spine",
-                fact: "มี 7 ชิ้น (C1-C7) โดย C1 เรียกว่า Atlas และ C2 เรียกว่า Axis การเคลื่อนย้ายผู้ป่วยอุบัติเหตุที่มีพยาธิสภาพกระดูกข้อคอหักห้ามขยับคอเป็นอันขาด ต้องติดปลอกคอแข็ง (Hard Collar) เพื่อป้องกันอันตรายต่อเส้นประสาทควบคุมการหายใจ (Phrenic Nerve)",
-                imSite: "Not Applicable",
-                hazard: "Phrenic Nerve injury / Respiratory Arrest",
-                xRatio: 0.50,
-                yRatio: 0.18
-            },
-            {
-                id: "lumbar",
-                nameTh: "กระดูกสันหลังเอว",
-                nameEn: "Lumbar Spine",
-                fact: "มี 5 ชิ้น (L1-L5) มีขนาดใหญ่และแข็งแกร่งรองรับน้ำหนักตัว โดยแนวระดับยอดเชิงกราน (Intercristal Line) จะตรงกับช่องว่าง L3-L4 ซึ่งเป็นแลนด์มาร์กมาตรฐานในการเจาะน้ำไขสันหลัง (Lumbar Puncture) เพื่อป้องกันการเจาะโดนเนื้อไขสันหลังจริง (Spinal Cord End at L1-L2)",
-                imSite: "Not Applicable",
-                hazard: "Spinal Cord Laceration (if > L2)",
-                xRatio: 0.50,
-                yRatio: 0.44
+                yRatio: 0.30,
+                hazardLevel: "CRITICAL"
             },
             {
                 id: "humerus",
                 nameTh: "กระดูกต้นแขน",
                 nameEn: "Humerus",
-                fact: "กระดูกยาวของท่อนแขนบน ปลายบนเป็นหัวรูปทรงกลมต่อกับเบ้าสะบัก บริเวณคอกระดูกต้นแขน (Surgical Neck) เป็นจุดเสี่ยงหักบ่อยและส่งผลให้เส้นประสาท Axillary ได้รับบาดเจ็บ นอกจากนี้ ปลายบนเป็นแลนด์มาร์กในการฉีดยากล้ามเนื้อ Deltoid (โดยนับต่ำลงมา 2-3 นิ้วมือจากปุ่ม Acromion)",
-                imSite: "Deltoid Site (IM 1-2 ml)",
-                hazard: "Axillary Nerve & Radial Nerve Injury",
-                xRatio: 0.38,
-                yRatio: 0.35
-            },
-            {
-                id: "radius",
-                nameTh: "กระดูกปลายแขนด้านนอก",
-                nameEn: "Radius (Lateral)",
-                fact: "กระดูกแขนท่อนปลายฝั่งนิ้วโป้ง เป็นแลนด์มาร์กสำคัญในการตรวจประเมินชีพจรส่วนปลาย (Radial Pulse) ตรงข้อมือ และเป็นแนวยึดจับเมื่อเข้าเฝือกข้อมือหักแบบ Colles' fracture (ปลายกระดูก Radius หักและเบนไปด้านหลัง)",
-                imSite: "Not Applicable",
-                hazard: "Radial Artery Occlusion",
+                fact: "ตำแหน่งแลนด์มาร์กสำคัญสำหรับการฉีดยากล้ามเนื้อ Deltoid IM โดยหาขอบ Acromion Process แล้วทาบลงมา 2-3 นิ้วมือ",
+                hazard: "หากแทงเข็มเยื้องไปโดนคอขวดกระดูกต้นแขนมากเกินไป เสี่ยงเข็มทำลายเส้นประสาท Axillary Nerve และขยับแขนยกไม่ได้!",
                 xRatio: 0.35,
-                yRatio: 0.44
+                yRatio: 0.33,
+                hazardLevel: "HIGH"
             },
             {
-                id: "iliac",
-                nameTh: "กระดูกปีกสะโพก",
+                id: "spine_lumbar",
+                nameTh: "กระดูกสันหลังส่วนเอว",
+                nameEn: "Lumbar Vertebrae",
+                fact: "ตำแหน่งสำหรับระบุแนวกระดูก L3-L4 ในการเจาะตรวจน้ำไขสันหลัง (Lumbar Puncture) เพื่อการวินิจฉัยเยื่อหุ้มสมองอักเสบ",
+                hazard: "หากแทงเข็มเขยิบสูงขึ้นไปเหนือระดับ L1-L2 มีโอกาสแทงทะลุเนื้อเยื่อไขสันหลัง (Spinal Cord Direct Injury) ทำให้ผู้ป่วยอัมพาตครึ่งซีก!",
+                xRatio: 0.50,
+                yRatio: 0.45,
+                hazardLevel: "CRITICAL"
+            },
+            {
+                id: "pelvis_crest",
+                nameTh: "ปีกเชิงกราน",
                 nameEn: "Iliac Crest",
-                fact: "ยอดขอบบนสุดของกระดูกสะโพก (Ilium) ซึ่งคลำได้จากภายนอก เป็นแลนด์มาร์กหลักร่วมกับปุ่มกระดูก ASIS เพื่อประเมินหาตำแหน่งฉีดยาเข้ากล้ามเนื้อสะโพกแบบ Ventrogluteal Site (ปลอดภัยสูงสุดเพราะหลีกเลี่ยงเส้นเลือดใหญ่และเส้นประสาท Sciatic Nerve)",
-                imSite: "Ventrogluteal Site (IM 3-5 ml)",
-                hazard: "Superior Gluteal Nerve Injury",
-                xRatio: 0.45,
-                yRatio: 0.50
-            },
-            {
-                id: "trochanter",
-                nameTh: "ปุ่มกระดูกต้นขาใหญ่",
-                nameEn: "Greater Trochanter",
-                fact: "ปุ่มนูนทางด้านข้างส่วนปลายบนสุดของกระดูกต้นขา (Femur) คลำพบได้ชัดเจนทางด้านข้างสะโพก ใช้เป็นแลนด์มาร์กอ้างอิงร่วมในการฉีดยากล้ามเนื้อสะโพกฝั่งนอก (Vastus Lateralis) และใช้ประเมินสัดส่วนความยาวขาเมื่อสงสัยภาวะข้อสะโพกหลุดคลาดเคลื่อน",
-                imSite: "Landmark for Dorsogluteal / VL",
-                hazard: "Sciatic Nerve Injury (if DG missed)",
-                xRatio: 0.41,
-                yRatio: 0.58
+                fact: "แนวระนาบปีกสะโพกบน (Tuffier's Line) ใช้หาข้อต่อ L4 และเป็นขอบเขตหลักในการระบุตำแหน่งฉีดยาสะโพก Ventrogluteal Site",
+                hazard: "เป็นจุดฉีดยาที่ปลอดภัยที่สุด แต่หากระบุจุดเล็งพลาดไปโดนสะโพกด้านหลัง เสี่ยงสูงที่จะทิ่มโดน Sciatic Nerve จนผู้ป่วยขาพิการชั่วคราว!",
+                xRatio: 0.44,
+                yRatio: 0.53,
+                hazardLevel: "HIGH"
             },
             {
                 id: "femur",
                 nameTh: "กระดูกต้นขา",
                 nameEn: "Femur",
-                fact: "กระดูกชิ้นยาวที่สุดและหนาที่สุดในร่างกาย บริเวณคอกระดูกต้นขา (Femoral Neck) มักหักง่ายในผู้สูงอายุที่เป็นโรคกระดูกพรุนเมื่อหกล้ม ทำให้ขาสั้นลงและแบะออกข้าง (External rotation) บริเวณหน้าขาคอกระดูกเป็นตำแหน่งของ Vastus Lateralis site (จุดฉีดยาที่ปลอดภัยที่สุดในเด็กอายุต่ำกว่า 3 ปี)",
-                imSite: "Vastus Lateralis Site (Preferred in infants)",
-                hazard: "Femoral Artery & Nerve Injury",
-                xRatio: 0.42,
-                yRatio: 0.69
-            },
-            {
-                id: "patella",
-                nameTh: "กระดูกสะบ้า",
-                nameEn: "Patella",
-                fact: "กระดูกรูปเซซามอยด์ (Sesamoid bone) ที่มีขนาดใหญ่ที่สุด พัฒนาอยู่ภายในเส้นเอ็นกล้ามเนื้อต้นขาเข่า (Quadriceps Tendon) ช่วยป้องกันการเสียดสีของเส้นเอ็นข้อพับเข่า และใช้เป็นแลนด์มาร์กสำคัญในการประเมินเคาะตรวจระบบประสาทอัตโนมัติ (Patellar Knee Jerk Reflex - L2-L4)",
-                imSite: "Not Applicable",
-                hazard: "Knee Joint Effusion / Infection",
-                xRatio: 0.42,
-                yRatio: 0.80
+                fact: "กระดูกชิ้นยาวที่สุด ใช้เป็นตำแหน่งฉีดยากล้ามเนื้อหน้าขาเด็กเล็ก (Vastus Lateralis IM) ในช่วง 1/3 ส่วนกลางค่อนไปด้านนอก",
+                hazard: "ในคนไข้สูงอายุมักพบอาการกระดูกคอสะโพกหักง่าย (Femoral Neck Fracture) จากการล้มหัวกระแทก ซึ่งต้องสังเกตภาวะขาข้างนั้นหดสั้นลงอย่างชัดเจน",
+                xRatio: 0.41,
+                yRatio: 0.69,
+                hazardLevel: "HIGH"
             },
             {
                 id: "tibia",
                 nameTh: "กระดูกหน้าแข้ง",
                 nameEn: "Tibia",
-                fact: "กระดูกแกนท่อนในที่รับน้ำหนักโดยตรงของขาส่วนล่าง ปลายล่างด้านในยื่นลงไปเป็นตาตุ่มใน (Medial Malleolus) ตัวกระดูกหน้าแข้งด้านหน้ามีเนื้อเยื่อปกคลุมบางมาก จึงมักเกิดการหักชนิดแผลเปิดทะลุเนื้อเห็นกระดูก (Open fracture) ได้ง่ายที่สุดเมื่อเกิดอุบัติเหตุทางถนน",
-                imSite: "Not Applicable",
-                hazard: "Osteomyelitis / Compartment Syndrome",
+                fact: "แลนด์มาร์กสำคัญในการแทงเข็มเข้าไขกระดูกกรณีวิกฤตด่วน (Intraosseous Infusion) โดยคลำหาจุดนูนใต้สะบ้าแล้วเยื้องมาทางใน 2 ซม.",
+                hazard: "หากแทงเข็มผิดมุมและแทงลึกลื่นทะลุไปทางด้านหลังกระดูก เสี่ยงทำลายเส้นเลือดใหญ่ Popliteal และเกิดอาการขาดเลือดเฉียบพลันที่เท้า!",
                 xRatio: 0.43,
-                yRatio: 0.90
+                yRatio: 0.88,
+                hazardLevel: "CRITICAL"
             }
         ];
 
-        // --- 2. คลังกรณีศึกษาทางคลินิกวิชาการพยาบาล (Nursing Case Scenarios) ---
+        // รายชื่อโจทย์กรณีศึกษาทางการพยาบาลเพื่อวัดทักษะการวิเคราะห์ (BSN Case Simulations)
         const CLINICAL_CASES = [
             {
-                title: "1. หัตถการเจาะน้ำไขสันหลัง (Lumbar Puncture)",
-                question: "ผู้ป่วยสงสัยภาวะเยื่อหุ้มสมองอักเสบ (Meningitis) แพทย์เตรียมทำหัตถการแทงเข็มเจาะน้ำไขสันหลัง พยาบาลวิชาชีพต้องระบุแนวเชื่อมระหว่างยอดกระดูกเชิงกรานทั้งสองข้างเพื่อระบุตำแหน่งช่องว่าง L3-L4 ในการจัดท่าผู้ป่วยเพื่อแทงเข็มอย่างปลอดภัย จงระบุ 'กระดูกสันหลังส่วนเอว'",
-                targetId: "lumbar"
+                id: "case_cpr",
+                title: "เคสที่ 1: การกู้ชีพคนไข้ภาวะหัวใจหยุดเต้นเฉียบพลัน (CPR Landmark)",
+                scenario: "ผู้ป่วยเพศชายอายุ 52 ปี ล้มหมดสติตรวจไม่พบชีพจร ทีมพยาบาลต้องเข้าทำกู้ชีพพื้นฐาน (CPR) ทันที นักศึกษาต้องจับคู่ลากกระดูกจุดอ้างอิงตรงทรวงอกที่ต้องกดลงเพื่อบีบหัวใจ และหลีกเลี่ยงกระดูกแหลมลิ้นปี่เพื่อป้องกันอันตรายแก่ตับคนไข้",
+                targetId: "sternum",
+                guideline: "ให้นักศึกษาลากกระดูก 'กระดูกหน้าอก (Sternum)' เข้าประกบเพื่อระบุตำแหน่งการนวดหัวใจที่ปลอดภัย"
             },
             {
-                title: "2. หัตถการช่วยฟื้นคืนชีพขั้นพื้นฐาน (Basic CPR)",
-                question: "คนไข้หญิงอายุ 55 ปี เกิดภาวะหัวใจหยุดเต้นฉับพลัน พยาบาลเข้าร่วมทีมกดนวดหัวใจ (Chest Compressions) พยาบาลจำต้องวางสันมือสองข้างซ้อนกันที่จุดกึ่งกลางส่วนล่างของกระดูกทรวงอกชิ้นใด เพื่อให้แรงกดบีบหัวใจได้เต็มพิกัดและลดโอกาสปอดฉีกจาก Xiphoid process หัก",
-                targetId: "sternum"
+                id: "case_subclavian",
+                title: "เคสที่ 2: การแทงสายน้ำเกลือและให้ยาระดับวิกฤต (Central Line Access)",
+                scenario: "คนไข้หญิงช็อกจากการติดเชื้อในกระแสเลือด แพทย์ต้องการแทงสายสวนเข้าเส้นเลือดดำใหญ่บริเวณทรวงอก (Subclavian Catheterization) พยาบาลเจ้าของไข้ต้องประเมินและคลำขอบกระดูกจุดใดเพื่อเตรียมผิวหนังสำหรับจุดแทงอย่างเป็นระบบ?",
+                targetId: "clavicle",
+                guideline: "ให้นักศึกษาลากชิ้นกระดูก 'กระดูกไหปลาร้า (Clavicle)' มาประกบจุดแลนด์มาร์กบนทรวงอก"
             },
             {
-                title: "3. การฉีดยาเข้ากล้ามสะโพกของเด็กทารก (Pediatric IM Injection)",
-                question: "ทารกอายุ 8 เดือน ต้องได้รับยาฉีดเข้ากล้ามเนื้ออย่างเร่งด่วนตามแผนการรักษา ตามหลักวิชาชีพพยาบาลห้ามใช้กล้ามเนื้อก้นสะโพก (Gluteal muscles) เพราะยังโตไม่เต็มที่ เสี่ยงโดนเส้นประสาทสะโพก แนะนำให้ประเมินฉีดยาเข้ากล้าม Vastus Lateralis บนกระดูกส่วนใดแทน",
-                targetId: "femur"
+                id: "case_lp",
+                title: "เคสที่ 3: หัตถการเตรียมเจาะตรวจไขสันหลัง (Lumbar Puncture setup)",
+                scenario: "เด็กชายวัย 18 ปี สงสัยเยื่อหุ้มสมองอักเสบ แพทย์นัดทำ Spinal Tap พยาบาลต้องจัดท่าคนไข้นอนงอตัวเปรียบเสมือนกุ้ง และคลำจุดสันหลังแนวระนาบสะโพก เพื่อหาตำแหน่งหมอนกระดูกส่วนเอวช่วงที่ปลอดภัยต่อการเลี่ยงโดนปลายสายไขสันหลังแท้",
+                targetId: "spine_lumbar",
+                guideline: "ให้นักศึกษาลากแผ่นกระดูก 'กระดูกสันหลังส่วนเอว (Lumbar Vertebrae)' เพื่อชี้จุดแทงเข็มเจาะน้ำเลี้ยงไขสันหลังที่ปลอดภัย"
             },
             {
-                title: "4. การประเมินจุดแลนด์มาร์กหา Ventrogluteal Site",
-                question: "พยาบาลต้องการประเมินตำแหน่งฉีดยาเข้ากล้ามสะโพกด้านหน้า (Ventrogluteal IM Site) ซึ่งเป็นจุดฉีดยาที่ปลอดภัยสูงสุดในผู้ใหญ่ พยาบาลวิชาชีพจำเป็นต้องใช้สันมือวางทับปุ่ม Greater Trochanter แล้วกางนิ้วชี้ไปแตะยังจุดยอดนูนด้านหน้าของกระดูกชิ้นใดเพื่อหาขอบเขตฉีดยา",
-                targetId: "iliac"
+                id: "case_im_gluteal",
+                title: "เคสที่ 4: การประเมินจุดฉีดยากล้ามเนื้อสะโพกปลอดภัย (Ventrogluteal Site)",
+                scenario: "คนไข้รับคำสั่งฉีดยาฆ่าเชื้อขนาด 2.5 mL เข้ากล้ามเนื้อลึก พยาบาลต้องการเลือกจุด 'Ventrogluteal Site' เพื่อลดความเสี่ยงแทงเข็มทะลุเส้นประสาทและเส้นเลือดใหญ่ที่ก้น โดยพยาบาลต้องกางนิ้วชี้ทาบขอบยอดปีกกระดูกเชิงกรานชิ้นใดในกายวิภาคศาสตร์เพื่อเล็ง?",
+                targetId: "pelvis_crest",
+                guideline: "ให้นักศึกษาลาก 'ปีกเชิงกราน (Iliac Crest)' มาวางเพื่อระบุพิกัดเป้าแลนด์มาร์กในการทาบนิ้วมือเล็งฉีดยา"
+            },
+            {
+                id: "case_im_pediatric",
+                title: "เคสที่ 5: การให้วัคซีนทารกแรกเกิดในห้องตรวจกุมารเวชกรรม",
+                scenario: "ทารกแรกเกิดอายุ 1 เดือน ได้รับคำสั่งฉีดวัคซีนป้องกันตับอักเสบบี ขนาด 0.5 mL พยาบาลวิชาชีพตระหนักดีว่าห้ามฉีดสะโพกในเด็กที่ยังไม่หัดเดินเด็ดขาดเนื่องจากกล้ามเนื้อฝ่อลีบและเสี่ยงทำร้ายเส้นประสาท จึงเลือกแทงบริเวณ Vastus Lateralis ของกระดูกแกนขาท่อนยาวชิ้นใด?",
+                targetId: "femur",
+                guideline: "ให้นักศึกษาลาก 'กระดูกต้นขา (Femur)' เข้าประกบเพื่ออ้างอิงจุดฉีดวัคซีนหน้าขาเด็กทารก"
+            },
+            {
+                id: "case_io_emergency",
+                title: "เคสที่ 6: การเข้าถึงระบบยาฉุกเฉินผ่านกระดูกเมื่อเจาะเส้นเลือดไม่พบ (IO Infusion)",
+                scenario: "คนไข้ช็อกขาดเลือดจากอุบัติเหตุรุนแรง แขนขาสองข้างบวมบดบังจนพยาบาลเจาะ IV ไม่ได้มา 3 ครั้ง ทีมแพทยศาสตราจารย์จึงเตรียมเครื่องเจาะแทงยาผ่านกระดูก (Intraosseous Infusion) บริเวณห่างจากหน้าแข้งด้านในคืบสั้น พยาบาลต้องระบุพิกัดกระดูกท่อนใดเพื่อลงเข็ม?",
+                targetId: "tibia",
+                guideline: "ให้นักศึกษาลาก 'กระดูกหน้าแข้ง (Tibia)' ไปที่เป้าเล็งปลายล่างขาเพื่อเตรียมส่งผ่านเข้าสายไขกระดูก"
             }
         ];
 
-        // --- 3. ระบบเสียงสังเคราะห์ทางการแพทย์ (Synthesized Clinical Audio) ---
-        class MedicalSoundEngine {
-            constructor() {
-                this.ctx = null;
-            }
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            }
-            // เสียงยืนยันความถูกต้องแบบ Telemetry
-            playConfirm() {
-                this.init();
-                if (!this.ctx) return;
-                let osc1 = this.ctx.createOscillator();
-                let osc2 = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                
-                osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(600, this.ctx.currentTime);
-                osc1.frequency.setValueAtTime(900, this.ctx.currentTime + 0.08);
-
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(1200, this.ctx.currentTime + 0.08);
-                
-                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
-                
-                osc1.connect(gain);
-                osc2.connect(gain);
-                gain.connect(this.ctx.destination);
-                
-                osc1.start();
-                osc2.start();
-                osc1.stop(this.ctx.currentTime + 0.25);
-                osc2.stop(this.ctx.currentTime + 0.25);
-            }
-            // เสียงสัญญาณเตือนทางการแพทย์เมื่อหยิบจับผิดจุด (Medical Warning)
-            playWarning() {
-                this.init();
-                if (!this.ctx) return;
-                let osc = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(240, this.ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(120, this.ctx.currentTime + 0.3);
-                
-                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
-                
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.3);
-            }
+        // --- 2. การสังเคราะห์เสียงแจ้งเตือน Web Audio API ---
+        class SoundEffects {
+            constructor() { this.ctx = null; }
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
             playGrab() {
-                this.init();
-                if (!this.ctx) return;
-                let osc = this.ctx.createOscillator();
-                let gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(450, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.08);
-                
-                gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-                
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.08);
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(350, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.15);
+                g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.15);
             }
-            playCompletion() {
-                this.init();
-                if (!this.ctx) return;
-                const melody = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-                melody.forEach((freq, idx) => {
-                    let osc = this.ctx.createOscillator();
-                    let gain = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.1);
-                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.1);
-                    gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.1 + 0.3);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(this.ctx.currentTime + idx * 0.1);
-                    osc.stop(this.ctx.currentTime + idx * 0.1 + 0.3);
+            playCorrect() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(523, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.16);
+                g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.35);
+            }
+            playIncorrect() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(90, this.ctx.currentTime + 0.3);
+                g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+            }
+            playVictory() {
+                this.init(); if (!this.ctx) return;
+                const notes = [523, 659, 784, 1046];
+                notes.forEach((freq, idx) => {
+                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.15);
+                    g.gain.setValueAtTime(0.1, this.ctx.currentTime + idx * 0.15);
+                    g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.15 + 0.4);
+                    osc.connect(g); g.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.15);
+                    osc.stop(this.ctx.currentTime + idx * 0.15 + 0.4);
                 });
             }
         }
-        const sfx = new MedicalSoundEngine();
+        const sfx = new SoundEffects();
 
-        // --- 4. การจัดการตัวแปรและสถานะแอปพลิเคชัน (Clinical Telemetry States) ---
+        // --- 3. ตัวแปรเก็บประวัติการทำวิจัยและสเตตัสด้านเรียลไทม์ (Research Telemetry State) ---
+        let researchLogs = []; 
+        let startTime = Date.now();
+        let totalAttempts = 0;
+        let successfulMatches = 0;
+        let totalErrors = 0;
+
+        let activeCaseIndex = 0;
         let inputMode = "AR"; 
-        let currentActivity = "STUDY"; 
-        let score = 0;
-        let gameTimeLeft = 120; // 2 นาที สำหรับการตอบคำถามกรณีศึกษา
-        let gameActive = false;
-        let timerInterval = null;
-
-        let activeCaseIndex = 0; // ดัชนีกรณีศึกษาทางพยาบาลปัจจุบัน
-        let boneItems = []; 
-        let activeDraggedId = null; 
+        let boneItems = [];
+        let activeDraggedId = null;
 
         let cursorX = 0;
         let cursorY = 0;
-        let isPinching = false; 
+        let isPinching = false;
+        
+        // ตัวแปรเก็บค่าตำแหน่งเยื้องหยิบจับ เพื่อความละเอียดสมจริงในการลาก (Offset Dragging Variables)
+        let grabOffsetX = 0;
+        let grabOffsetY = 0;
 
-        // องค์ประกอบ DOM
         const videoElement = document.getElementById('webcam');
         const canvasElement = document.getElementById('game-canvas');
         const canvasCtx = canvasElement.getContext('2d');
@@ -503,315 +427,224 @@
         const factTitle = document.getElementById('fact-title');
         const factLatin = document.getElementById('fact-latin');
         const factDesc = document.getElementById('fact-desc');
-        const telImSite = document.getElementById('tel-im-site');
-        const telHazard = document.getElementById('tel-hazard');
 
-        const clinicalCaseBox = document.getElementById('clinical-case-box');
-        const caseCounter = document.getElementById('case-counter');
-        const caseTitle = document.getElementById('case-title');
-        const caseQuestion = document.getElementById('case-question');
-        const caseTargetLabel = document.getElementById('case-target-label');
-        const btnSkipCase = document.getElementById('btn-skip-case');
-
-        // --- 5. การจำลองวาดสัดส่วนโครงกระดูกระดับคลินิกที่ถูกต้อง (Realistic Vector Skeleton) ---
+        // --- 4. ฟังก์ชันสำหรับการวาดแบบจำลองโครงร่างร่างกายเชิงคลินิก ---
         function drawVectorSkeleton(ctx, centerX, width, height) {
             ctx.save();
-            ctx.strokeStyle = "rgba(100, 116, 139, 0.55)"; 
-            ctx.lineWidth = 3;
-            ctx.fillStyle = "rgba(248, 250, 252, 0.9)"; 
-
-            // 1. หัวกะโหลกละเอียดขึ้น (Detailed Skull Contour)
-            const headY = height * 0.12;
-            const headRadius = Math.min(width, height) * 0.045;
-            ctx.beginPath();
-            ctx.arc(centerX, headY - 8, headRadius, 0.1 * Math.PI, 0.9 * Math.PI, true);
-            ctx.quadraticCurveTo(centerX - headRadius*0.7, headY + headRadius*0.7, centerX - headRadius*0.5, headY + headRadius*1.1);
-            ctx.lineTo(centerX + headRadius*0.5, headY + headRadius*1.1);
-            ctx.quadraticCurveTo(centerX + headRadius*0.7, headY + headRadius*0.7, centerX + headRadius, headY - 8);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // รูเบ้าตาและโพรงจมูกจำลอง
-            ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-            ctx.beginPath();
-            ctx.arc(centerX - 10, headY - 4, 6, 0, Math.PI*2);
-            ctx.arc(centerX + 10, headY - 4, 6, 0, Math.PI*2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(centerX, headY + 5);
-            ctx.lineTo(centerX - 4, headY + 12);
-            ctx.lineTo(centerX + 4, headY + 12);
-            ctx.closePath();
-            ctx.fill();
-
-            // 2. กระดูกสันหลังคอและคอต่อไหล่ (Cervical & Clavicle Lines)
-            const clavicleY = height * 0.23;
-            const shoulderWidth = Math.min(width, height) * 0.11;
-            ctx.beginPath();
-            // Clavicle Left & Right
-            ctx.moveTo(centerX, clavicleY + 4);
-            ctx.quadraticCurveTo(centerX - shoulderWidth*0.5, clavicleY - 12, centerX - shoulderWidth, clavicleY);
-            ctx.moveTo(centerX, clavicleY + 4);
-            ctx.quadraticCurveTo(centerX + shoulderWidth*0.5, clavicleY - 12, centerX + shoulderWidth, clavicleY);
-            ctx.lineWidth = 4;
-            ctx.strokeStyle = "rgba(203, 213, 225, 0.8)";
-            ctx.stroke();
-
-            // 3. กระดูกหน้าอกและกระดูกซี่โครง (Sternum & Ribs Basket)
-            const sternumTopY = height * 0.23;
-            const sternumBotY = height * 0.35;
-            ctx.beginPath();
-            ctx.moveTo(centerX, sternumTopY);
-            ctx.lineTo(centerX, sternumBotY);
-            ctx.lineWidth = 10; // ลำตัวกระดูกอกหนาชัดเจน
-            ctx.strokeStyle = "rgba(241, 245, 249, 0.9)";
-            ctx.stroke();
-            
-            // วาดรูปปลายกระดูก Xiphoid Process เล็กๆ
-            ctx.beginPath();
-            ctx.moveTo(centerX, sternumBotY);
-            ctx.lineTo(centerX, sternumBotY + 10);
+            ctx.strokeStyle = "rgba(100, 116, 139, 0.4)";
             ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "rgba(239, 68, 68, 0.7)"; // จุดอันตรายคอยเตือนสีส้มแดง
-            ctx.stroke();
+            ctx.fillStyle = "rgba(226, 232, 240, 0.85)";
 
-            // กรงซี่โครงด้านซ้ายและขวา
-            ctx.save();
-            ctx.lineWidth = 3.5;
-            ctx.strokeStyle = "rgba(226, 232, 240, 0.65)";
-            const ribSpacing = 10;
-            const ribRadius = Math.min(width, height) * 0.08;
-            for (let i = 0; i < 7; i++) {
-                let yOffset = sternumTopY + 15 + (i * ribSpacing);
-                ctx.beginPath();
-                ctx.arc(centerX - ribRadius/2, yOffset, ribRadius/2, -Math.PI*0.4, Math.PI*0.5, true);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(centerX + ribRadius/2, yOffset, ribRadius/2, -Math.PI*0.6, Math.PI*0.5, false);
-                ctx.stroke();
-            }
-            ctx.restore();
-
-            // 4. แนวระดูกสันหลังทั้งหมด (Spine vertebrae column)
+            // 1. หัวกะโหลก
+            const headY = height * 0.14;
+            const headRadius = Math.min(width, height) * 0.055;
             ctx.beginPath();
-            ctx.moveTo(centerX, headY + headRadius*1.1);
-            ctx.lineTo(centerX, height * 0.53);
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = "rgba(148, 163, 184, 0.55)";
+            ctx.arc(centerX, headY - 12, headRadius, 0, Math.PI * 2);
+            ctx.fill();
             ctx.stroke();
 
-            // 5. ปีกเชิงกรานและขอบปีกสะโพกสะบักเชิงกราน (Detailed Pelvis Structure)
-            const pelvisY = height * 0.53;
-            const pelvisWidth = Math.min(width, height) * 0.09;
-            ctx.save();
-            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.rect(centerX - headRadius * 0.55, headY - 12 + headRadius * 0.75, headRadius * 1.1, headRadius * 0.55);
+            ctx.fill();
+            ctx.stroke();
+
+            // 2. กระดูกไหปลาร้าซ้าย-ขวา
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "rgba(203, 213, 225, 0.9)";
+            ctx.beginPath();
+            ctx.moveTo(centerX, headY + headRadius * 1.2);
+            ctx.quadraticCurveTo(centerX - width*0.06, headY + headRadius * 1.1, centerX - width*0.11, headY + headRadius * 1.4);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX, headY + headRadius * 1.2);
+            ctx.quadraticCurveTo(centerX + width*0.06, headY + headRadius * 1.1, centerX + width*0.11, headY + headRadius * 1.4);
+            ctx.stroke();
+
+            // 3. กระดูกหน้าอก (Sternum)
+            ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+            ctx.beginPath();
+            ctx.rect(centerX - 8, headY + headRadius * 1.4, 16, height * 0.13);
+            ctx.fill();
+            ctx.stroke();
+
+            // ปลายลิ้นปี่อันตราย (Xiphoid Process)
+            ctx.fillStyle = "#ef4444";
+            ctx.beginPath();
+            ctx.moveTo(centerX - 4, headY + headRadius * 1.4 + height * 0.13);
+            ctx.lineTo(centerX + 4, headY + headRadius * 1.4 + height * 0.13);
+            ctx.lineTo(centerX, headY + headRadius * 1.4 + height * 0.13 + 12);
+            ctx.closePath();
+            ctx.fill();
+
+            // 4. แนวระดูกสันหลัง L1-L5 (Lumbar Spine)
+            ctx.lineWidth = 7;
+            ctx.strokeStyle = "rgba(203, 213, 225, 0.85)";
+            const spineTop = headY + headRadius * 1.4 + height * 0.13 + 12;
+            const spineBottom = height * 0.53;
+            ctx.beginPath();
+            ctx.moveTo(centerX, spineTop);
+            ctx.lineTo(centerX, spineBottom);
+            ctx.stroke();
+
+            // 5. ปีกสะโพกเชิงกรานพร้อมระบุแนวยอด Iliac Crest
+            const pelvisY = spineBottom;
+            const pelvisW = Math.min(width, height) * 0.095;
+            ctx.lineWidth = 3;
+            ctx.fillStyle = "rgba(241, 245, 249, 0.9)";
+            ctx.strokeStyle = "rgba(100, 116, 139, 0.6)";
+            ctx.beginPath();
+            ctx.ellipse(centerX, pelvisY, pelvisW, pelvisW * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // ขอบบนของยอดปีกเชิงกราน (Iliac Crest)
+            ctx.strokeStyle = "#f59e0b";
+            ctx.lineWidth = 4.5;
+            ctx.beginPath();
+            ctx.arc(centerX - pelvisW*0.6, pelvisY - pelvisW*0.1, 10, Math.PI * 0.7, Math.PI * 1.7);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX + pelvisW*0.6, pelvisY - pelvisW*0.1, 10, Math.PI * 1.3, Math.PI * 0.3);
+            ctx.stroke();
+
+            // 6. แขนด้านซ้ายและขวา
+            const elbowY = height * 0.43;
+            ctx.lineWidth = 5;
             ctx.strokeStyle = "rgba(226, 232, 240, 0.85)";
-            ctx.fillStyle = "rgba(241, 245, 249, 0.85)";
-            
-            // วาดปีกสะโพกเชิงกรานสองด้านที่โค้งรับแลนด์มาร์ก ASIS ได้จริง
+            // ข้างซ้ายของหน้าจอ (แขนขวา)
             ctx.beginPath();
-            ctx.ellipse(centerX - pelvisWidth*0.5, pelvisY, pelvisWidth*0.6, pelvisWidth * 0.4, -0.15 * Math.PI, 0, Math.PI * 2);
-            ctx.ellipse(centerX + pelvisWidth*0.5, pelvisY, pelvisWidth*0.6, pelvisWidth * 0.4, 0.15 * Math.PI, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(centerX - width*0.11, headY + headRadius * 1.4);
+            ctx.lineTo(centerX - width*0.125, elbowY);
             ctx.stroke();
-            
-            // ช่องว่ารูอุ้งเชิงกรานด้านใน (Obturator Foramen)
-            ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+            // ข้างขวาของหน้าจอ (แขนซ้าย)
             ctx.beginPath();
-            ctx.arc(centerX - 16, pelvisY + 14, 8, 0, Math.PI*2);
-            ctx.arc(centerX + 16, pelvisY + 14, 8, 0, Math.PI*2);
-            ctx.fill();
-            ctx.restore();
-
-            // 6. แขนด้านซ้ายและขวา (Humerus, Radius, Ulna)
-            const elbowY = height * 0.41;
-            const wristY = height * 0.52;
-            const shL = centerX - shoulderWidth;
-            const shR = centerX + shoulderWidth;
-
-            ctx.lineWidth = 5;
-            // แขนขวา (ด้านซ้ายจอ)
-            ctx.beginPath();
-            ctx.moveTo(shL, clavicleY);
-            ctx.lineTo(shL - 18, elbowY); // Humerus
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(shL - 18, elbowY);
-            ctx.lineTo(shL - 14, wristY); // Radius & Ulna
-            ctx.lineWidth = 3.5;
+            ctx.moveTo(centerX + width*0.11, headY + headRadius * 1.4);
+            ctx.lineTo(centerX + width*0.125, elbowY);
             ctx.stroke();
 
-            // แขนซ้าย (ด้านขวาจอ)
-            ctx.lineWidth = 5;
+            // 7. กระดูกต้นขา (Femur)
+            const kneeY = height * 0.78;
+            const ankleY = height * 0.94;
+            const legW = pelvisW * 0.65;
+
+            ctx.fillStyle = "#38bdf8";
+            // ขวาจอ
             ctx.beginPath();
-            ctx.moveTo(shR, clavicleY);
-            ctx.lineTo(shR + 18, elbowY);
+            ctx.moveTo(centerX + legW, pelvisY);
+            ctx.lineTo(centerX + legW * 0.9, kneeY);
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(shR + 18, elbowY);
-            ctx.lineTo(shR + 14, wristY);
-            ctx.lineWidth = 3.5;
-            ctx.stroke();
-
-            // 7. กระดูกโครงขา (Femur, Greater Trochanter, Tibia, Fibula)
-            const femurY = height * 0.69;
-            const kneeY = height * 0.80;
-            const ankleY = height * 0.93;
-            const pelvisLegAnchorW = pelvisWidth * 0.5;
-
-            // ขาขวา (ด้านซ้ายจอ)
-            ctx.lineWidth = 5.5;
-            ctx.beginPath();
-            // จุดต่อหัวกระดูกต้นขาเข้าไปปีกสะโพก
-            ctx.moveTo(centerX - pelvisLegAnchorW, pelvisY + 5);
-            // แสดงปุ่ม Greater Trochanter คลาดขอบนูนเล็กน้อยเพื่อเป็นแลนด์มาร์กเด่นชัด
-            ctx.lineTo(centerX - pelvisLegAnchorW - 14, pelvisY + 22);
-            ctx.lineTo(centerX - pelvisLegAnchorW - 8, kneeY); // Femur Shaft
-            ctx.stroke();
-
-            // ลูกสะบ้าเข่า (Patella)
-            ctx.beginPath();
-            ctx.arc(centerX - pelvisLegAnchorW - 8, kneeY, 5.5, 0, Math.PI*2);
-            ctx.fillStyle = "rgba(241, 245, 249, 0.9)";
+            ctx.arc(centerX + legW * 0.9, kneeY, 6, 0, Math.PI*2);
             ctx.fill();
             ctx.stroke();
 
-            // ขาท่อนล่าง (หน้าแข้ง Tibia และ น่อง Fibula คู่ขนานกัน)
+            // ขาขวา (ซ้ายจอ)
             ctx.beginPath();
-            ctx.moveTo(centerX - pelvisLegAnchorW - 8, kneeY + 5);
-            ctx.lineTo(centerX - pelvisLegAnchorW - 8, ankleY); // Tibia
+            ctx.moveTo(centerX - legW, pelvisY);
+            ctx.lineTo(centerX - legW * 0.9, kneeY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX - legW * 0.9, kneeY, 6, 0, Math.PI*2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 8. กระดูกหน้าแข้งท่อนหนา (Tibia)
             ctx.lineWidth = 4.5;
-            ctx.stroke();
-
-            // ขาซ้าย (ด้านขวาจอ)
-            ctx.lineWidth = 5.5;
+            ctx.strokeStyle = "rgba(241, 245, 249, 0.95)";
             ctx.beginPath();
-            ctx.moveTo(centerX + pelvisLegAnchorW, pelvisY + 5);
-            ctx.lineTo(centerX + pelvisLegAnchorW + 14, pelvisY + 22);
-            ctx.lineTo(centerX + pelvisLegAnchorW + 8, kneeY);
+            ctx.moveTo(centerX - legW * 0.9, kneeY + 5);
+            ctx.lineTo(centerX - legW * 0.95, ankleY);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.arc(centerX + pelvisLegAnchorW + 8, kneeY, 5.5, 0, Math.PI*2);
-            ctx.fillStyle = "rgba(241, 245, 249, 0.9)";
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(centerX + pelvisLegAnchorW + 8, kneeY + 5);
-            ctx.lineTo(centerX + pelvisLegAnchorW + 8, ankleY);
-            ctx.lineWidth = 4.5;
+            ctx.moveTo(centerX + legW * 0.9, kneeY + 5);
+            ctx.lineTo(centerX + legW * 0.95, ankleY);
             ctx.stroke();
 
             ctx.restore();
         }
 
-        // --- 6. แผนการจัดสร้างแผ่นป้ายและระบบสากลบอร์ดคำศัพท์ ---
+        // --- 5. การกระจายป้ายคำศัพท์และกำหนดพิกัดความละเอียดหน้าจอ ---
         function initBoneItems() {
             const w = canvasElement.width || 800;
             const h = canvasElement.height || 600;
 
             boneItems = BONE_DATA.map((bone, index) => {
                 const isLeft = index % 2 === 0;
-                
-                // กระจายป้ายตามแนวตั้งซ้าย-ขวาอย่างสมดุล ไม่หลุดหน้าจอ
-                const colX = isLeft ? 10 + 70 : w - 10 - 70;
+                const startX = isLeft ? 10 + 65 : w - 10 - 65;
                 const rowCount = Math.ceil(BONE_DATA.length / 2);
                 const rowIndex = Math.floor(index / 2);
-                const startY = 85 + (rowIndex * ((h - 180) / rowCount));
+                const startY = 85 + (rowIndex * ((h - 170) / rowCount));
 
                 return {
                     ...bone,
-                    currentX: colX,
+                    currentX: startX,
                     currentY: startY,
                     isPlaced: false,
                     isHovered: false,
-                    width: 140,
-                    height: 40
+                    width: 125,
+                    height: 38
                 };
             });
             updateSidebarPalette();
-            updateCaseDisplay();
+            loadCase(activeCaseIndex);
+        }
+
+        function loadCase(idx) {
+            if (idx >= CLINICAL_CASES.length) {
+                triggerResearchEnd();
+                return;
+            }
+            const item = CLINICAL_CASES[idx];
+            document.getElementById('case-index').innerText = `Case ${idx + 1} / ${CLINICAL_CASES.length}`;
+            document.getElementById('case-title').innerText = item.title;
+            document.getElementById('case-scenario').innerText = item.scenario;
+
+            document.getElementById('hazard-title').innerText = "Nursing Clinical Status";
+            document.getElementById('hazard-desc').innerText = `แนวทางการทำภารกิจวิจัย: ${item.guideline}`;
+            document.getElementById('hazard-level').innerText = "PENDING";
+            document.getElementById('hazard-level').className = "text-xs font-bold text-sky-400 uppercase tracking-widest font-mono";
+            document.getElementById('hazard-impact').innerText = "Waiting for student selection...";
         }
 
         function updateSidebarPalette() {
             paletteContainer.innerHTML = '';
-            
             boneItems.forEach(item => {
-                // หากกำลังอยู่ในโหมดเกมตอบคำถามกรณีศึกษา และป้ายนี้วางถูกต้องไปแล้ว
                 const card = document.createElement('div');
-                card.className = `p-2.5 rounded-lg border text-left cursor-pointer transition flex flex-col justify-between ${
+                card.className = `p-2 rounded border text-left cursor-pointer transition flex flex-col justify-between ${
                     item.isPlaced 
-                    ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' 
-                    : 'bg-slate-900 border-slate-800 hover:border-cyan-500/50 hover:bg-slate-850'
+                    ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-300' 
+                    : 'bg-slate-900 border-slate-800 hover:border-teal-500/40 hover:bg-slate-850'
                 }`;
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold leading-normal text-white">${item.nameTh}</span>
-                        ${item.isPlaced ? '<span class="text-[9px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded font-semibold">✓ Verified</span>' : ''}
+                        <span class="text-[11px] font-semibold leading-tight">${item.nameTh}</span>
+                        ${item.isPlaced ? '<span class="text-[8px] px-1 py-0.2 bg-emerald-500/20 text-emerald-400 rounded font-bold">✓ สแกนผ่าน</span>' : ''}
                     </div>
-                    <span class="text-[9.5px] text-slate-400 font-mono italic">${item.nameEn}</span>
+                    <span class="text-[9px] text-slate-400 italic">${item.nameEn}</span>
                 `;
                 
                 card.addEventListener('click', () => {
-                    displayBoneClinicalDetails(item);
+                    document.getElementById('hazard-title').innerText = item.nameTh + " (" + item.nameEn + ")";
+                    document.getElementById('hazard-desc').innerText = `รายละเอียดชีวเวช: ${item.fact} \nภัยวิกฤต: ${item.hazard}`;
+                    document.getElementById('hazard-level').innerText = item.hazardLevel;
+                    
+                    const lvlColor = item.hazardLevel === "CRITICAL" ? "text-red-500 font-bold" : "text-amber-500 font-bold";
+                    document.getElementById('hazard-level').className = `text-xs uppercase tracking-widest font-mono ${lvlColor}`;
+                    document.getElementById('hazard-impact').innerText = "Anatomical Hazard Information";
                 });
                 paletteContainer.appendChild(card);
             });
 
             const placedCount = boneItems.filter(b => b.isPlaced).length;
-            placedCounterEl.innerText = `วางผ่าน ${placedCount} / ${boneItems.length} ชิ้น`;
+            placedCounterEl.innerText = `${placedCount} / ${CLINICAL_CASES.length} ชิ้นที่ตอบถูก`;
         }
 
-        function displayBoneClinicalDetails(bone) {
-            factTitle.innerText = bone.nameTh;
-            factLatin.innerText = bone.nameEn;
-            factDesc.innerText = bone.fact;
-            
-            // แสดงข้อมูลใน Telemetry ด้านล่างเพื่อความเป็นวิทยาศาสตร์พยาบาล
-            telImSite.innerText = bone.imSite;
-            telHazard.innerText = bone.hazard;
-            
-            // เปลี่ยนสีของสถานะ Telemetry ให้น่าเชื่อถือ
-            if (bone.imSite !== "Not Applicable" && bone.imSite !== "Not Recommended") {
-                telImSite.className = "text-emerald-400 font-bold block";
-            } else {
-                telImSite.className = "text-amber-500 font-medium block";
-            }
-
-            if (bone.hazard !== "N/A") {
-                telHazard.className = "text-rose-400 font-bold block";
-            } else {
-                telHazard.className = "text-slate-400 block";
-            }
-        }
-
-        // --- 7. การบริหารกรณีศึกษา (Clinical Case Scenario Controls) ---
-        function updateCaseDisplay() {
-            if (currentActivity === "STUDY") {
-                clinicalCaseBox.classList.add('hidden');
-                btnSkipCase.classList.add('hidden');
-                return;
-            }
-
-            clinicalCaseBox.classList.remove('hidden');
-            btnSkipCase.classList.remove('hidden');
-
-            const currentCase = CLINICAL_CASES[activeCaseIndex];
-            caseCounter.innerText = `Case ${activeCaseIndex + 1} / ${CLINICAL_CASES.length}`;
-            caseTitle.innerText = currentCase.title;
-            caseQuestion.innerText = currentCase.question;
-            
-            // ใบ้ชนิดกระดูกแต่เป็นชื่อวิชาการภาษาอังกฤษเชิงท้าทาย
-            const correspondingBone = BONE_DATA.find(b => b.id === currentCase.targetId);
-            caseTargetLabel.innerText = `${correspondingBone.nameEn} (${correspondingBone.nameTh})`;
-        }
-
-        // --- 8. ระบบตรวจวัดการจับคู่เป้าหมาย (Snapping & Verification) ---
+        // --- 6. ระบบวิเคราะห์พฤติกรรมการตอบกลับและตรวจสอบแลนด์มาร์ก ---
         function checkTargetPlacement(itemId) {
+            const currentCase = CLINICAL_CASES[activeCaseIndex];
             const item = boneItems.find(b => b.id === itemId);
-            if (!item) return;
+            if (!item || !currentCase) return;
 
             const centerX = canvasElement.width / 2;
             const targetX = centerX;
@@ -820,54 +653,46 @@
             const distance = Math.hypot(item.currentX - targetX, item.currentY - targetY);
             const successThreshold = 65; 
 
-            // ตรวจสอบความถูกต้องแยกตามกิจกรรม
-            let isCorrectPlacement = false;
+            totalAttempts++;
 
-            if (currentActivity === "STUDY") {
-                // โหมดเรียนรู้ วางชิ้นไหนก็ได้ให้ตรงจุด
-                isCorrectPlacement = (distance < successThreshold);
-            } else {
-                // โหมดกรณีศึกษาทางการพยาบาล: ต้องเอาชิ้นกระดูกที่ตรงกับโจทย์เคสปัจจุบัน มาวางให้ตรงจุดด้วย
-                const currentCase = CLINICAL_CASES[activeCaseIndex];
-                isCorrectPlacement = (distance < successThreshold && item.id === currentCase.targetId);
-            }
-
-            if (isCorrectPlacement) {
-                // วางถูกต้องตรงจุดเป้าหมายสรีรวิทยา
+            if (item.id === currentCase.targetId && distance < successThreshold) {
                 item.currentX = targetX;
                 item.currentY = targetY;
                 item.isPlaced = true;
+                successfulMatches++;
                 
-                sfx.playConfirm();
-                displayBoneClinicalDetails(item);
+                sfx.playCorrect();
+
+                document.getElementById('hazard-title').innerText = "🎉 สำเร็จภารกิจทางการพยาบาล!";
+                document.getElementById('hazard-desc').innerText = `พยาบาลวิเคราะห์ถูกต้อง! กระดูก ${item.nameTh} เป็นตำแหน่งระบุขอบเขตแลนด์มาร์กที่แพทย์กำหนด \n\nข้อคำนึง: ${item.fact}`;
+                document.getElementById('hazard-level').innerText = "SAFE";
+                document.getElementById('hazard-level').className = "text-xs font-bold text-emerald-400 uppercase tracking-widest font-mono";
+                document.getElementById('hazard-impact').innerText = "Procedure completed safely";
+
+                logResearchAction(currentCase.id, item.id, "SUCCESS", totalAttempts);
                 updateSidebarPalette();
 
-                if (currentActivity === "GAME" && gameActive) {
-                    score += 150; // คะแนนเพิ่มสูงขึ้นตามระดับวิชาการ
-                    document.getElementById('game-score').innerText = String(score).padStart(3, '0');
-                    
-                    // เลื่อนกรณีศึกษาพยาบาลถัดไป
-                    setTimeout(() => {
-                        if (activeCaseIndex < CLINICAL_CASES.length - 1) {
-                            activeCaseIndex++;
-                            updateCaseDisplay();
-                        } else {
-                            // ผ่านกรณีศึกษาทางคลินิกครบทั้งหมด!
-                            endGame(true);
-                        }
-                    }, 1200);
-                } else {
-                    // โหมดเรียนรู้ธรรมดา หากต่อเสร็จครบถ้วน ให้ขึ้นหน้าต่างแสดงความยินดี
-                    const allPlaced = boneItems.every(b => b.isPlaced);
-                    if (allPlaced) {
-                        endGame(true);
-                    }
-                }
+                setTimeout(() => {
+                    activeCaseIndex++;
+                    loadCase(activeCaseIndex);
+                }, 3200);
+
             } else {
-                // วางผิดจุด ส่งเสียงร้องเตือนและส่งกระดอนกลับตำแหน่งตั้งต้นของตนเอง
-                sfx.playWarning();
+                totalErrors++;
+                sfx.playIncorrect();
+
+                document.getElementById('hazard-title').innerText = `⚠️ ตรวจพบข้อผิดพลาด: ${item.nameTh}`;
+                document.getElementById('hazard-desc').innerText = `อันตรายทางคลินิก: ${item.hazard}`;
+                document.getElementById('hazard-level').innerText = "FAIL / CRITICAL";
+                document.getElementById('hazard-level').className = "text-xs font-bold text-red-500 uppercase tracking-widest font-mono animate-bounce";
+                document.getElementById('hazard-impact').innerText = "Inaccurate needle placement!";
+
+                logResearchAction(currentCase.id, item.id, "FAILURE", totalAttempts);
+                updateStats();
+
                 resetCardPosition(item);
             }
+            updateStats();
         }
 
         function resetCardPosition(item) {
@@ -878,11 +703,120 @@
             const rowCount = Math.ceil(BONE_DATA.length / 2);
             const rowIndex = Math.floor(index / 2);
 
-            item.currentX = isLeft ? 10 + 70 : w - 10 - 70;
-            item.currentY = 85 + (rowIndex * ((h - 180) / rowCount));
+            item.currentX = isLeft ? 10 + 65 : w - 10 - 65;
+            item.currentY = 85 + (rowIndex * ((h - 170) / rowCount));
         }
 
-        // --- 9. ระบบควบคุมการสัมผัส / เมาส์ (Mouse & Touch Engine Fallback) ---
+        // --- 7. การเก็บบันทึกสถิติเพื่อส่งออกผลงานวิจัย ---
+        function logResearchAction(caseId, selectedBoneId, result, attemptNumber) {
+            const durationSinceStart = Math.floor((Date.now() - startTime) / 1000);
+            
+            const logEntry = {
+                timestamp: new Date().toISOString(),
+                caseId: caseId,
+                selectedBoneId: selectedBoneId,
+                status: result,
+                attemptNumber: attemptNumber,
+                timeSpentSeconds: durationSinceStart,
+                accumulatedErrors: totalErrors
+            };
+            researchLogs.push(logEntry);
+        }
+
+        function updateStats() {
+            const accuracy = totalAttempts > 0 ? Math.round((successfulMatches / totalAttempts) * 100) : 0;
+            document.getElementById('stat-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('stat-errors').innerText = `${totalErrors} ครั้ง`;
+            
+            const duration = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('stat-duration').innerText = `${duration}s`;
+        }
+
+        function exportResearchCSV() {
+            if (researchLogs.length === 0) {
+                alert("ยังไม่มีประวัติการโต้ตอบของนักศึกษาในระบบการสอน กรุณาปฏิบัติงานเคสพยาบาลเสียก่อน");
+                return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Timestamp,Case_ID,Selected_Anatomy_Bone,Assessment_Result,Attempt_Number,Time_Spent_Seconds,Accumulated_Errors\n";
+
+            researchLogs.forEach(log => {
+                csvContent += `"${log.timestamp}","${log.caseId}","${log.selectedBoneId}","${log.status}",${log.attemptNumber},${log.timeSpentSeconds},${log.accumulatedErrors}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `AnatoAR_B.S.N_Research_${Math.floor(Math.random() * 900000 + 100000)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('btn-export-data').addEventListener('click', exportResearchCSV);
+        document.getElementById('btn-modal-export').addEventListener('click', exportResearchCSV);
+
+        // ตัวอัปเดตสถิติตารางเวลา
+        setInterval(() => {
+            if (activeCaseIndex < CLINICAL_CASES.length) {
+                updateStats();
+            }
+        }, 1000);
+
+        document.getElementById('btn-skip').addEventListener('click', () => {
+            activeCaseIndex++;
+            loadCase(activeCaseIndex);
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            activeCaseIndex = 0;
+            totalAttempts = 0;
+            successfulMatches = 0;
+            totalErrors = 0;
+            startTime = Date.now();
+            researchLogs = [];
+            
+            initBoneItems();
+            updateStats();
+        });
+
+        function triggerResearchEnd() {
+            sfx.playVictory();
+            const accuracy = totalAttempts > 0 ? Math.round((successfulMatches / totalAttempts) * 100) : 0;
+            const duration = Math.floor((Date.now() - startTime) / 1000);
+
+            document.getElementById('modal-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('modal-errors').innerText = `${totalErrors} ครั้ง`;
+            document.getElementById('modal-time').innerText = `${duration} วินาที`;
+
+            let feedText = "";
+            if (accuracy >= 80 && totalErrors <= 1) {
+                feedText = "ระดับทักษะ: ดีเยี่ยม (Expert Clinician) นักศึกษามีความคล่องตัวในการระบุจุดแลนด์มาร์กทางการพยาบาลอย่างแม่นยำสูง มั่นใจได้ว่าการปฏิบัติจริงกับผู้ป่วยจะมีระดับความปลอดภัยสูงสุด!";
+            } else if (accuracy >= 55) {
+                feedText = "ระดับทักษะ: พอใช้ (Competent Clinician) มีความเข้าใจกระบวนการเจาะหัตถการพื้นฐาน แต่อาจมีข้อผิดพลาดทิศทางเข็มสะบัด แนะนำให้ทดสอบซ้ำบ่อยๆ เพื่อพัฒนาการวิเคราะห์ปฏิกิริยาอัตโนมัติ";
+            } else {
+                feedText = "ระดับทักษะ: ต้องปรับปรุงความแม่นยำ (Novice) นักศึกษามีอัตราการระบุจุดแลนด์มาร์กผิดที่สะสม เสี่ยงต่อการเกิดอันตรายรุนแรง ควรได้รับการชี้แจงจากอาจารย์ผู้ดูแลอย่างใกล้ชิด";
+            }
+            document.getElementById('evaluation-text').innerText = feedText;
+            document.getElementById('success-modal').classList.remove('hidden');
+        }
+
+        // --- 9. การทำงานร่วมของโหมดควบคุม (Mouse vs AR Camera Controllers) ---
+        const btnAR = document.getElementById('btn-ar-mode');
+        const btnMouse = document.getElementById('btn-mouse-mode');
+
+        btnAR.addEventListener('click', () => {
+            inputMode = "AR";
+            btnAR.className = "px-2.5 py-1.5 rounded bg-cyan-950 border border-cyan-500/30 text-xs font-semibold text-cyan-400 transition hover:bg-cyan-900/40";
+            btnMouse.className = "px-2.5 py-1.5 rounded bg-slate-800 text-xs font-semibold text-slate-300 transition hover:bg-slate-750";
+        });
+
+        btnMouse.addEventListener('click', () => {
+            inputMode = "MOUSE";
+            btnMouse.className = "px-2.5 py-1.5 rounded bg-cyan-950 border border-cyan-500/30 text-xs font-semibold text-cyan-400 transition hover:bg-cyan-900/40";
+            btnAR.className = "px-2.5 py-1.5 rounded bg-slate-800 text-xs font-semibold text-slate-300 transition hover:bg-slate-750";
+        });
+
         function addMouseListeners() {
             const getCanvasPos = (e) => {
                 const rect = canvasElement.getBoundingClientRect();
@@ -911,6 +845,9 @@
                         cursorY <= item.currentY + item.height/2) {
                         
                         activeDraggedId = item.id;
+                        // คำนวณตําแหน่ง Offset เมาส์ เพื่อไม่ให้แผ่นกระดาษกระตุกเข้าหาศูนย์กลางอย่างกะทันหัน
+                        grabOffsetX = item.currentX - cursorX;
+                        grabOffsetY = item.currentY - cursorY;
                         sfx.playGrab();
                         break;
                     }
@@ -926,8 +863,8 @@
                 if (isPinching && activeDraggedId) {
                     const item = boneItems.find(b => b.id === activeDraggedId);
                     if (item) {
-                        item.currentX = cursorX;
-                        item.currentY = cursorY;
+                        item.currentX = cursorX + grabOffsetX;
+                        item.currentY = cursorY + grabOffsetY;
                     }
                 }
             };
@@ -950,124 +887,7 @@
             window.addEventListener('touchend', handleEnd);
         }
 
-        // --- 10. ระบบควบคุมเวลากิจกรรมและประเมินเกรดพยาบาล ---
-        function startTimer() {
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (!gameActive) return;
-                gameTimeLeft--;
-                
-                const minutes = Math.floor(gameTimeLeft / 60);
-                const seconds = gameTimeLeft % 60;
-                document.getElementById('game-timer').innerText = 
-                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-                if (gameTimeLeft <= 0) {
-                    endGame(false);
-                }
-            }, 1000);
-        }
-
-        function endGame(isVictory) {
-            gameActive = false;
-            clearInterval(timerInterval);
-            
-            if (isVictory) {
-                sfx.playCompletion();
-                document.getElementById('modal-score').innerText = score;
-                
-                const minutes = Math.floor(gameTimeLeft / 60);
-                const seconds = gameTimeLeft % 60;
-                document.getElementById('modal-time').innerText = 
-                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                
-                let evalText = "";
-                if (currentActivity === "GAME") {
-                    if (gameTimeLeft > 60) {
-                        evalText = "วิเศษสุด! เกรดประเมินระดับ A+ คุณสามารถวิเคราะห์แลนด์มาร์กเพื่อความปลอดภัยของคนไข้ระดับสมบูรณ์แบบ";
-                    } else if (gameTimeLeft > 25) {
-                        evalText = "ดีเยี่ยม! เกรดประเมินระดับ B+ คุณมีทักษะทางกายวิภาคศาสตร์คลินิกที่พร้อมสำหรับการฝึกงานบนตึกผู้ป่วย";
-                    } else {
-                        evalText = "ผ่านการประเมิน! แนะนำให้ทบทวนจุดพยาธิสภาพกระดูกอย่างสม่ำเสมอเพื่อความปลอดภัยยิ่งขึ้น";
-                    }
-                } else {
-                    evalText = "ยินดีด้วย! คุณเรียนรู้อัตลักษณ์กระดูกทั้ง 12 จุดสำหรับการพยาบาลระดับพื้นฐานเรียบร้อยแล้ว";
-                }
-                document.getElementById('evaluation-text').innerText = `"${evalText}"`;
-                document.getElementById('success-modal').classList.remove('hidden');
-            } else {
-                alert("หมดเวลาการประเมินผลหัตถการคลินิก! มาทบทวนบทเรียนและเริ่มใหม่อีกครั้งเพื่อความปลอดภัยของคนไข้กันเถอะ");
-                resetSession();
-            }
-        }
-
-        function resetSession() {
-            score = 0;
-            gameTimeLeft = 120; // 2 นาที
-            activeCaseIndex = 0;
-            document.getElementById('game-score').innerText = "000";
-            document.getElementById('game-timer').innerText = currentActivity === "GAME" ? "02:00" : "--:--";
-            document.getElementById('success-modal').classList.add('hidden');
-            
-            initBoneItems();
-            
-            if (currentActivity === "GAME") {
-                gameActive = true;
-                startTimer();
-            } else {
-                gameActive = false;
-                clearInterval(timerInterval);
-            }
-        }
-
-        // --- 11. การตั้งค่าปุ่มและสลับโหมดการทำงานทั้งหมด ---
-        document.getElementById('btn-mode-study').addEventListener('click', () => {
-            currentActivity = "STUDY";
-            document.getElementById('display-mode-tag').innerText = "🔬 โหมดเรียนรู้คำศัพท์";
-            document.getElementById('btn-mode-study').className = "py-2.5 px-3 rounded-lg text-xs font-bold text-center border transition-all duration-200 bg-emerald-950/30 border-emerald-500/40 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)]";
-            document.getElementById('btn-mode-game').className = "py-2.5 px-3 rounded-lg text-xs font-bold text-center border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200";
-            resetSession();
-        });
-
-        document.getElementById('btn-mode-game').addEventListener('click', () => {
-            currentActivity = "GAME";
-            document.getElementById('display-mode-tag').innerText = "🏥 Clinical Case Study";
-            document.getElementById('btn-mode-game').className = "py-2.5 px-3 rounded-lg text-xs font-bold text-center border transition-all duration-200 bg-emerald-950/30 border-emerald-500/40 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)]";
-            document.getElementById('btn-mode-study').className = "py-2.5 px-3 rounded-lg text-xs font-bold text-center border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200";
-            resetSession();
-        });
-
-        document.getElementById('btn-reset').addEventListener('click', resetSession);
-        document.getElementById('btn-modal-restart').addEventListener('click', resetSession);
-
-        document.getElementById('btn-skip-case').addEventListener('click', () => {
-            if (activeCaseIndex < CLINICAL_CASES.length - 1) {
-                activeCaseIndex++;
-                updateCaseDisplay();
-            } else {
-                alert("สิ้นสุดกรณีศึกษาในคลังรอบนี้แล้วครับ!");
-            }
-        });
-
-        const btnAR = document.getElementById('btn-ar-mode');
-        const btnMouse = document.getElementById('btn-mouse-mode');
-        const playGuide = document.getElementById('tutorial-card');
-
-        btnAR.addEventListener('click', () => {
-            inputMode = "AR";
-            btnAR.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-900/55 flex items-center gap-1.5";
-            btnMouse.className = "px-3 py-1.5 rounded-md text-xs font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
-            playGuide.classList.remove('hidden');
-        });
-
-        btnMouse.addEventListener('click', () => {
-            inputMode = "MOUSE";
-            btnMouse.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-900/55 flex items-center gap-1.5";
-            btnAR.className = "px-3 py-1.5 rounded-md text-xs font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
-            playGuide.classList.add('hidden');
-        });
-
-        // --- 12. ระบบคำนวณปัญญาประดิษฐ์ตรวจข้อต่อนิ้ว AR (MediaPipe Engine Integration) ---
+        // --- 10. ระบบความลื่นไหลและเชื่อมโยง MediaPipe Hands AI ---
         let handsAI = null;
 
         function startMediaPipeTracking() {
@@ -1101,9 +921,8 @@
                     document.getElementById('loading-screen').classList.add('hidden');
                 })
                 .catch(err => {
-                    console.warn("กล้องเว็บบอร์ดไม่พร้อมใช้งาน:", err);
+                    console.warn("ไม่ได้รับอนุมัติใช้งานกล้องถ่ายรูป:", err);
                     document.getElementById('loading-screen').classList.add('hidden');
-                    document.getElementById('camera-error-toast').classList.remove('hidden');
                     btnMouse.click();
                     renderFrameWithoutAI();
                 });
@@ -1113,7 +932,6 @@
             canvasCtx.save();
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             
-            // สะท้อนภาพซ้ายขวาเพิ่มสัญชาตญาณผู้ใช้
             canvasCtx.translate(canvasElement.width, 0);
             canvasCtx.scale(-1, 1);
             canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
@@ -1125,8 +943,14 @@
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const handLandmarks = results.multiHandLandmarks[0];
 
+                // หาค่าเฉลี่ยขนาดมือโดยอ้างอิงระยะห่างจากข้อมือ (0) ไปจนถึงโคนนิ้วกลาง (9) เพื่อปรับความเสถียรไร้ขีดจำกัดเรื่องระยะห่างกล้อง
+                const wrist = handLandmarks[0];
+                const middleMCP = handLandmarks[9];
+                const handScale = Math.hypot(wrist.x - middleMCP.x, wrist.y - middleMCP.y);
+
                 const thumbTip = handLandmarks[4];
                 const indexTip = handLandmarks[8];
+                const middleTip = handLandmarks[12]; // เพิ่มนิ้วกลางสำหรับช่วยหนีบจับทางเลือกให้เป็นธรรมชาติขึ้น (Tripod Grab)
 
                 const realX = (1 - indexTip.x) * canvasElement.width;
                 const realY = indexTip.y * canvasElement.height;
@@ -1134,15 +958,18 @@
                 cursorX = realX;
                 cursorY = realY;
 
-                // การสแกนระยะจีบมือ 2D เพื่อป้องกันความแกว่งไกวจากการวัดระนาบลึกของกล้องเดี่ยว
-                const distanceBetweenTips = Math.hypot(
-                    thumbTip.x - indexTip.x,
-                    thumbTip.y - indexTip.y
-                );
+                // คำนวณระยะจีบนิ้วแบบ 2D ที่เสถียรสูงสุด โดยปรับฐานเทียบเทียบกับอัตราส่วนขนาดมือ (Hand Scale Calibration)
+                const indexThumbDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y) / handScale;
+                const middleThumbDist = Math.hypot(thumbTip.x - middleTip.x, thumbTip.y - middleTip.y) / handScale;
 
-                const pinchThreshold = 0.048; 
-                
-                if (distanceBetweenTips < pinchThreshold) {
+                // นำเอาระบบหน่วงความสั่นไหว (Hysteresis/Schmitt Trigger) มาใช้เพื่อป้องกันแผ่นป้ายกระตุกร่วงลงมาอย่างไร้ระเบียบ
+                const startPinchThreshold = 0.28;  // บีบนิ้วชิดเป็นพิเศษเพื่อเริ่มต้นคีบ
+                const releasePinchThreshold = 0.42; // ยอมผ่อนปรนนิ้วได้กว้างขึ้นเมื่อถือแผ่นเคลื่อนไหวอยู่
+
+                const isCurrentlyPinching = (indexThumbDist < (isPinching ? releasePinchThreshold : startPinchThreshold)) || 
+                                             (middleThumbDist < (isPinching ? releasePinchThreshold : startPinchThreshold));
+
+                if (isCurrentlyPinching) {
                     if (!isPinching) {
                         isPinching = true;
                         
@@ -1156,6 +983,9 @@
                                 cursorY <= item.currentY + item.height/2) {
                                 
                                 activeDraggedId = item.id;
+                                // คำนวณจุดคีบชดเชยที่ถูกต้อง (Grab Offset Compensation) แผ่นป้ายจะไม่กระชากเข้าศูนย์กลางนิ้วทันที
+                                grabOffsetX = item.currentX - cursorX;
+                                grabOffsetY = item.currentY - cursorY;
                                 sfx.playGrab();
                                 break;
                             }
@@ -1165,8 +995,9 @@
                     if (activeDraggedId) {
                         const item = boneItems.find(b => b.id === activeDraggedId);
                         if (item) {
-                            item.currentX = cursorX;
-                            item.currentY = cursorY;
+                            // การจัดวางสมดุลแผ่นป้ายลากตามนิ้วอย่างเนียนสมบูรณ์
+                            item.currentX = cursorX + grabOffsetX;
+                            item.currentY = cursorY + grabOffsetY;
                         }
                     }
                 } else {
@@ -1237,66 +1068,66 @@
             requestAnimationFrame(renderFrameWithoutAI);
         }
 
-        // --- 13. ระบบเรนเดอร์ลายเส้นการ์ดคำศัพท์คลินิกและวงเป้าสแกนร่วม ---
+        // --- 11. การจัดวาดกราฟิกแผ่นป้ายและเป้าเล็งวงกลมบน Canvas ---
         function drawInteractiveItemsAndTargets() {
             const centerX = canvasElement.width / 2;
+            const currentCase = CLINICAL_CASES[activeCaseIndex];
 
+            // วาดเป้าสแกนวงกลมกากบาท
             boneItems.forEach(item => {
                 const targetX = centerX;
                 const targetY = canvasElement.height * item.yRatio;
+                const isCurrentTarget = (currentCase && item.id === currentCase.targetId);
 
                 canvasCtx.beginPath();
-                canvasCtx.arc(targetX, targetY, 14, 0, Math.PI * 2);
+                canvasCtx.arc(targetX, targetY, isCurrentTarget ? 18 : 14, 0, Math.PI * 2);
                 
                 if (item.isPlaced) {
-                    canvasCtx.fillStyle = "rgba(16, 185, 129, 0.3)";
+                    canvasCtx.fillStyle = "rgba(16, 185, 129, 0.4)";
                     canvasCtx.fill();
                     canvasCtx.strokeStyle = "#10b981";
-                    canvasCtx.lineWidth = 2;
+                    canvasCtx.lineWidth = 2.5;
+                } else if (isCurrentTarget) {
+                    canvasCtx.fillStyle = "rgba(245, 158, 11, 0.2)";
+                    canvasCtx.fill();
+                    canvasCtx.strokeStyle = "#f59e0b";
+                    canvasCtx.lineWidth = 2.5;
                 } else {
-                    // หากชิ้นนี้กำลังเป็นเป้าหมายที่โจทย์เกมปัจจุบันพยาบาลกำลังตามหาอยู่
-                    const isCurrentQuizTarget = (currentActivity === "GAME" && gameActive && item.id === CLINICAL_CASES[activeCaseIndex].targetId);
-                    
-                    if (isCurrentQuizTarget) {
-                        canvasCtx.fillStyle = "rgba(244, 63, 94, 0.2)"; // เปล่งออร่าสีชมพูแดงเพื่อนำสายตา
-                        canvasCtx.fill();
-                        canvasCtx.strokeStyle = "#f43f5e";
-                        canvasCtx.lineWidth = 2.5;
-                        canvasCtx.shadowColor = "#f43f5e";
-                        canvasCtx.shadowBlur = 8;
-                    } else {
-                        canvasCtx.fillStyle = "rgba(15, 23, 42, 0.65)";
-                        canvasCtx.fill();
-                        canvasCtx.strokeStyle = "rgba(6, 182, 212, 0.4)";
-                        canvasCtx.lineWidth = 1.5;
-                        canvasCtx.shadowBlur = 0;
-                    }
-                    
-                    canvasCtx.moveTo(targetX - 6, targetY);
-                    canvasCtx.lineTo(targetX + 6, targetY);
-                    canvasCtx.moveTo(targetX, targetY - 6);
-                    canvasCtx.lineTo(targetX, targetY + 6);
+                    canvasCtx.fillStyle = "rgba(15, 23, 42, 0.7)";
+                    canvasCtx.fill();
+                    canvasCtx.strokeStyle = "rgba(20, 184, 166, 0.4)";
+                    canvasCtx.lineWidth = 1.2;
                 }
                 canvasCtx.stroke();
-                canvasCtx.shadowBlur = 0; // คืนค่าเงา
             });
 
-            // วาดแผ่นป้ายคำศัพท์ทางคลินิก
+            // วาดแผ่นป้ายคำศัพท์
             boneItems.forEach(item => {
-                canvasCtx.save();
-                
                 const isDragging = (item.id === activeDraggedId);
                 const x = item.currentX;
                 const y = item.currentY;
                 const w = item.width;
                 const h = item.height;
 
-                // ไฮไลต์เรืองแสงกรณีพิเศษ
+                // วาดเส้นโยงเลเซอร์โฮโลแกรม (Laser Reticle Link) เพื่อบอกตำแหน่งเล็งให้เป๊ะขึ้นก่อนการหยิบ
+                if (item.isHovered && !item.isPlaced && !isDragging) {
+                    canvasCtx.save();
+                    canvasCtx.beginPath();
+                    canvasCtx.moveTo(cursorX, cursorY);
+                    canvasCtx.lineTo(x, y);
+                    canvasCtx.strokeStyle = "rgba(244, 63, 94, 0.4)";
+                    canvasCtx.lineWidth = 1.5;
+                    canvasCtx.setLineDash([3, 3]);
+                    canvasCtx.stroke();
+                    canvasCtx.restore();
+                }
+
+                canvasCtx.save();
                 if (item.isHovered && !item.isPlaced) {
-                    canvasCtx.shadowColor = "#f43f5e"; // เรืองแสงชมพูเข้มเมื่อเอามือชี้โดน
+                    canvasCtx.shadowColor = "#f43f5e";
                     canvasCtx.shadowBlur = 10;
                 } else if (isDragging) {
-                    canvasCtx.shadowColor = "#10b981"; // เรืองแสงเขียวอ่อนเมื่อหยิบคีบลาก
+                    canvasCtx.shadowColor = "#22d3ee";
                     canvasCtx.shadowBlur = 15;
                     canvasCtx.scale(1.04, 1.04);
                 }
@@ -1312,21 +1143,20 @@
                 canvasCtx.arcTo(x - w/2, y + h/2, x - w/2, y - h/2, r);
                 canvasCtx.closePath();
 
-                // การเปลี่ยนชุดสีสไตล์การแพทย์
                 if (item.isPlaced) {
-                    canvasCtx.fillStyle = "rgba(4, 120, 87, 0.95)"; 
-                    canvasCtx.strokeStyle = "#34d399";
+                    canvasCtx.fillStyle = "rgba(6, 78, 59, 0.9)";
+                    canvasCtx.strokeStyle = "#10b981";
                     canvasCtx.lineWidth = 2;
                 } else if (isDragging) {
-                    canvasCtx.fillStyle = "rgba(16, 185, 129, 0.9)"; 
-                    canvasCtx.strokeStyle = "#10b981";
-                    canvasCtx.lineWidth = 2.5;
+                    canvasCtx.fillStyle = "rgba(15, 118, 110, 0.95)";
+                    canvasCtx.strokeStyle = "#2dd4bf";
+                    canvasCtx.lineWidth = 2;
                 } else if (item.isHovered) {
-                    canvasCtx.fillStyle = "rgba(159, 18, 57, 0.9)"; 
-                    canvasCtx.strokeStyle = "#fb7185";
-                    canvasCtx.lineWidth = 2.2;
+                    canvasCtx.fillStyle = "rgba(136, 19, 55, 0.9)";
+                    canvasCtx.strokeStyle = "#f43f5e";
+                    canvasCtx.lineWidth = 1.8;
                 } else {
-                    canvasCtx.fillStyle = "rgba(15, 23, 42, 0.85)"; 
+                    canvasCtx.fillStyle = "rgba(15, 23, 42, 0.85)";
                     canvasCtx.strokeStyle = "rgba(148, 163, 184, 0.4)";
                     canvasCtx.lineWidth = 1.2;
                 }
@@ -1334,67 +1164,66 @@
                 canvasCtx.fill();
                 canvasCtx.stroke();
 
-                // จุดเซนเซอร์จำลอง
+                // ป้ายแทบสีระดับภัยวิกฤตของกระดูก
                 canvasCtx.beginPath();
-                canvasCtx.arc(x - w/2 + 14, y, 4, 0, Math.PI * 2);
-                canvasCtx.fillStyle = item.isPlaced ? "#34d399" : (isDragging ? "#10b981" : (item.isHovered ? "#fda4af" : "#06b6d4"));
+                canvasCtx.rect(x - w/2 + 10, y - 10, 5, 20);
+                canvasCtx.fillStyle = item.isPlaced ? "#34d399" : (item.hazardLevel === "CRITICAL" ? "#ef4444" : "#f59e0b");
                 canvasCtx.fill();
 
-                // ป้อนข้อความ
-                canvasCtx.font = "bold 12px 'Kanit'";
-                canvasCtx.fillStyle = item.isPlaced ? "#d1fae5" : "#ffffff";
+                canvasCtx.font = "bold 11px 'Chakra Petch'";
+                canvasCtx.fillStyle = item.isPlaced ? "#a7f3d0" : "#ffffff";
                 canvasCtx.textAlign = "left";
                 canvasCtx.textBaseline = "middle";
                 canvasCtx.fillText(item.nameTh, x - w/2 + 24, y - 5);
 
                 canvasCtx.font = "italic 8.5px 'Share Tech Mono'";
-                canvasCtx.fillStyle = item.isPlaced ? "#a7f3d0" : (item.isHovered ? "#fda4af" : "#94a3b8");
+                canvasCtx.fillStyle = item.isPlaced ? "#34d399" : "#94a3b8";
                 canvasCtx.fillText(item.nameEn, x - w/2 + 24, y + 8);
 
                 canvasCtx.restore();
             });
         }
 
-        // --- 14. วาดเป้าเล็งวงกลมและขอนิ้วมือเชื่อมโยง (Target Reticle) ---
+        // ตัวเรืองแสงของเป้าเล็งนิ้ว
         function drawGlowingCursor() {
             if (cursorX === 0 && cursorY === 0) return;
 
             canvasCtx.save();
             canvasCtx.beginPath();
             canvasCtx.arc(cursorX, cursorY, isPinching ? 6 : 9, 0, Math.PI * 2);
-            canvasCtx.fillStyle = isPinching ? "rgba(16, 185, 129, 0.7)" : "rgba(6, 182, 212, 0.6)";
+            canvasCtx.fillStyle = isPinching ? "rgba(16, 185, 129, 0.7)" : "rgba(34, 211, 238, 0.55)";
             canvasCtx.fill();
-            canvasCtx.strokeStyle = isPinching ? "#34d399" : "#22d3ee";
+            canvasCtx.strokeStyle = isPinching ? "#10b981" : "#22d3ee";
             canvasCtx.lineWidth = 2.5;
             canvasCtx.stroke();
 
             canvasCtx.beginPath();
-            canvasCtx.arc(cursorX, cursorY, isPinching ? 12 : 16, 0, Math.PI * 2);
-            canvasCtx.strokeStyle = isPinching ? "rgba(16, 185, 129, 0.35)" : "rgba(6, 182, 212, 0.25)";
-            canvasCtx.lineWidth = 1.5;
-            canvasCtx.setLineDash([3, 3]);
+            canvasCtx.arc(cursorX, cursorY, isPinching ? 13 : 18, 0, Math.PI * 2);
+            canvasCtx.strokeStyle = isPinching ? "rgba(16, 185, 129, 0.35)" : "rgba(34, 211, 238, 0.25)";
+            canvasCtx.lineWidth = 1.2;
+            canvasCtx.setLineDash([4, 4]);
             canvasCtx.stroke();
             canvasCtx.restore();
         }
 
         function drawVirtualHandSkeleton(ctx, landmarks) {
             ctx.save();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = "rgba(16, 185, 129, 0.75)"; // สีเขียวสว่างทางการแพทย์
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "rgba(45, 212, 191, 0.8)"; 
 
             const fingerConnections = [
-                [0, 1, 2, 3, 4],       // โป้ง
-                [0, 5, 6, 7, 8],       // ชี้
-                [5, 9, 13, 17],        
-                [0, 17, 18, 19, 20],   // ก้อย
-                [9, 10, 11, 12],       // กลาง
-                [13, 14, 15, 16]       // นาง
+                [0, 1, 2, 3, 4],
+                [0, 5, 6, 7, 8],
+                [5, 9, 13, 17],
+                [0, 17, 18, 19, 20],
+                [9, 10, 11, 12],
+                [13, 14, 15, 16]
             ];
 
             fingerConnections.forEach(chain => {
                 ctx.beginPath();
                 for (let i = 0; i < chain.length; i++) {
-                    const id = chain[i];
+                    const id = chain[id] || chain[i];
                     const pt = landmarks[id];
                     const pxX = (1 - pt.x) * canvasElement.width;
                     const pxY = pt.y * canvasElement.height;
@@ -1410,15 +1239,15 @@
                 const pxY = pt.y * canvasElement.height;
 
                 ctx.beginPath();
-                ctx.arc(pxX, pxY, idx === 8 || idx === 4 ? 5.5 : 3, 0, Math.PI * 2);
+                ctx.arc(pxX, pxY, idx === 8 || idx === 4 ? 6 : 3, 0, Math.PI * 2);
                 
                 if (idx === 8 || idx === 4) {
-                    ctx.fillStyle = isPinching ? "#10b981" : "#00f0ff";
+                    ctx.fillStyle = isPinching ? "#10b981" : "#2dd4bf";
                 } else {
                     ctx.fillStyle = "#ffffff";
                 }
                 ctx.fill();
-                ctx.strokeStyle = "#000000";
+                ctx.strokeStyle = "rgba(15, 23, 42, 1)";
                 ctx.lineWidth = 1;
                 ctx.stroke();
             });
@@ -1426,7 +1255,7 @@
             ctx.restore();
         }
 
-        // --- 15. ปรับเปลี่ยนตำแหน่ง Responsive เมื่อขนาดจอขยับ ---
+        // --- 12. การปรับขนาดตามหน้าจอ (Responsive Handling) ---
         function handleResize() {
             const container = canvasElement.parentElement;
             canvasElement.width = container.clientWidth;
@@ -1440,24 +1269,23 @@
                     const isLeft = index % 2 === 0;
                     const w = canvasElement.width;
                     const h = canvasElement.height;
-                    const startX = isLeft ? 10 + 70 : w - 10 - 70;
+                    const startX = isLeft ? 10 + 65 : w - 10 - 65;
                     const rowCount = Math.ceil(BONE_DATA.length / 2);
                     const rowIndex = Math.floor(index / 2);
                     
                     item.currentX = startX;
-                    item.currentY = 85 + (rowIndex * ((h - 180) / rowCount));
+                    item.currentY = 85 + (rowIndex * ((h - 170) / rowCount));
                 }
             });
         }
 
-        // --- 16. สั่งบูตระบบเมื่อหน้าต่างพร้อม ---
+        // เริ่มต้นการทำงานเมื่อหน้าต่างเว็บพร้อมประมวลผล
         window.onload = function() {
             handleResize();
             window.addEventListener('resize', handleResize);
             
             initBoneItems();
             addMouseListeners();
-            
             startMediaPipeTracking();
         };
 
