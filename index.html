@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnatoAR Clinical Research Dashboard</title>
+    <title>AnatoAR Clinical B.S.N. Telemetry V2.1</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts for Medical Display -->
@@ -19,7 +19,7 @@
         body {
             font-family: 'Chakra Petch', sans-serif;
         }
-        .mono {
+        .font-mono {
             font-family: 'Share Tech Mono', monospace;
         }
         @keyframes scan {
@@ -43,10 +43,10 @@
                 <svg class="w-10 h-10 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             </div>
         </div>
-        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 mb-2">AnatoAR Clinical Dashboard</h2>
-        <p class="text-slate-400 max-w-md text-sm mb-4 font-light">กำลังเชื่อมต่อกล้องและโมเดลประมวลผลข้อต่อกระดูกมือ AI เพื่อใช้ประเมินทักษะทางคลินิก...</p>
+        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 mb-2 font-mono">AnatoAR Clinical Telemetry V2.1</h2>
+        <p class="text-slate-400 max-w-md text-sm mb-4 font-light">กำลังเชื่อมต่อกล้องเว็บแคมและโมเดลประมวลผลข้อต่อกระดูกมือ AI เพื่อใช้ประเมินทักษะทางคลินิก...</p>
         <div class="w-64 bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
-            <div class="bg-teal-500 h-full w-0 animate-pulse" style="width: 80%"></div>
+            <div id="loading-bar" class="bg-teal-500 h-full w-0 transition-all duration-350 ease-out" style="width: 20%"></div>
         </div>
     </div>
 
@@ -54,20 +54,19 @@
     <header class="bg-slate-900 border-b border-slate-800 py-2.5 px-6 flex justify-between items-center z-10 shrink-0">
         <div class="flex items-center gap-3">
             <div class="bg-teal-500/10 p-2 rounded-lg text-teal-400 border border-teal-500/20">
-                <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 leading-tight">AnatoAR Clinical Nursing Dashboard</h1>
-                <p class="text-[11px] text-slate-400 tracking-wide uppercase">ระบบเรียนรู้ทางคลินิกและจัดเก็บบันทึกผลงานวิจัยพฤติกรรมพยาบาล (B.S.N.)</p>
+                <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 leading-tight">AnatoAR Clinical Telemetry V2.1</h1>
+                <p class="text-[11px] text-slate-400 tracking-wide uppercase">เครื่องมือประเมินระดับพยาธิวิทยาและทดสอบตัวแปรแทรกซ้อน (Variable Separation System)</p>
             </div>
         </div>
 
-        <!-- แท็บสลับโหมดและตัวชี้วัดความพร้อมของกล้อง -->
         <div class="flex items-center gap-2">
-            <div class="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-850 flex items-center gap-2 text-xs">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-                <span class="text-slate-400">สถานะระบบวิจัย:</span>
-                <span id="header-status-tag" class="font-bold text-emerald-400 mono">READY</span>
+            <div class="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2 text-xs">
+                <div class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></div>
+                <span class="text-slate-400">กลุ่มตัวอย่าง:</span>
+                <input id="research-subject-id" type="text" value="B.S.N.-01" class="bg-slate-900 text-teal-400 font-bold border border-slate-800 rounded px-1.5 py-0.5 w-20 text-center uppercase focus:outline-none focus:border-teal-500" />
             </div>
             <button id="btn-ar-mode" class="px-2.5 py-1.5 rounded bg-cyan-950 border border-cyan-500/30 text-xs font-semibold text-cyan-400 transition hover:bg-cyan-900/40">
                 📷 โหมดกล้อง AR
@@ -92,7 +91,7 @@
             <!-- คำอธิบายปุ่มโต้ตอบด่วน -->
             <div class="absolute bottom-3 left-3 z-10 max-w-[280px] bg-slate-950/90 border border-teal-500/20 p-3 rounded-lg shadow-2xl backdrop-blur">
                 <h4 class="text-[11px] font-bold text-teal-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                    🎯 คู่มือการคุมด้วยท่าทาง AR
+                    🎯 คู่มือการควบคุมด้วยท่าทาง AR
                 </h4>
                 <ul class="text-[10px] text-slate-300 space-y-1 list-disc list-inside">
                     <li>เลื่อน <span class="text-cyan-400 font-semibold">เป้าชี้สีฟ้า (ปลายนิ้วชี้)</span> ทับป้ายกระดูก</li>
@@ -102,21 +101,62 @@
             </div>
 
             <!-- กล่องแสดงตัวชี้วัดสถิติพฤติกรรมเรียลไทม์ (Research Metrics Telemetry) -->
-            <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                <div class="bg-slate-900/95 border border-slate-800 rounded-lg p-3 grid grid-cols-3 gap-4 min-w-[280px]">
-                    <div>
-                        <span class="text-[9px] text-slate-400 uppercase block">อัตราตอบถูก</span>
-                        <span id="stat-accuracy" class="text-lg font-bold text-emerald-400 mono leading-none">0%</span>
-                    </div>
-                    <div class="border-l border-slate-800 pl-3">
-                        <span class="text-[9px] text-slate-400 uppercase block">ทำพลาดสะสม</span>
-                        <span id="stat-errors" class="text-lg font-bold text-rose-400 mono leading-none">0 ครั้ง</span>
-                    </div>
-                    <div class="border-l border-slate-800 pl-3">
-                        <span class="text-[9px] text-slate-400 uppercase block">ระยะเวลารวม</span>
-                        <span id="stat-duration" class="text-lg font-bold text-cyan-400 mono leading-none">0s</span>
+            <div class="absolute top-3 left-3 right-3 z-10 flex flex-col md:flex-row gap-2 pointer-events-none">
+                <!-- มิติความรู้ (Cognitive Metrics) -->
+                <div class="flex-1 bg-slate-900/95 border border-emerald-500/30 rounded-lg p-2.5 backdrop-blur shadow-lg">
+                    <span class="text-[9px] uppercase bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded">มิติด้านความรู้ (Cognitive Performance)</span>
+                    <div class="grid grid-cols-2 gap-2 mt-1.5 text-xs">
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">ตอบคำถามผิดพลาด (Knowledge Error)</span>
+                            <span id="metric-cognitive-errors" class="text-sm font-bold text-emerald-400 font-mono">0 ครั้ง</span>
+                        </div>
+                        <div class="border-l border-slate-800 pl-2">
+                            <span class="text-[9px] text-slate-400 block">เวลาที่ใช้คิดวิเคราะห์ (Decision Time)</span>
+                            <span id="metric-decision-time" class="text-sm font-bold text-emerald-400 font-mono">0.00s</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- มิติตัวแปรแทรกซ้อน (Motor / Technical Metrics) -->
+                <div class="flex-1 bg-slate-900/95 border border-fuchsia-500/30 rounded-lg p-2.5 backdrop-blur shadow-lg">
+                    <span class="text-[9px] uppercase bg-fuchsia-500/20 text-fuchsia-400 font-bold px-1.5 py-0.5 rounded">มิต้านการควบคุมและการลากวาง (Motor Performance)</span>
+                    <div class="grid grid-cols-2 gap-2 mt-1.5 text-xs">
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">ทำป้ายหลุดมือ/กล้องคลาดเคลื่อน</span>
+                            <span id="metric-motor-drops" class="text-sm font-bold text-fuchsia-400 font-mono">0 ครั้ง</span>
+                        </div>
+                        <div class="border-l border-slate-800 pl-2">
+                            <span class="text-[9px] text-slate-400 block">เวลาลากวางทางกายภาพ (Execution Time)</span>
+                            <span id="metric-execution-time" class="text-sm font-bold text-fuchsia-400 font-mono">0.00s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ข้อความแนะนำปรับเทียบเบื้องต้น -->
+            <div id="calibration-alert" class="absolute inset-x-6 top-1/3 bg-teal-950/90 border border-teal-500 rounded-xl p-5 text-center shadow-2xl backdrop-blur max-w-md mx-auto z-20">
+                <div class="w-12 h-12 bg-teal-900/50 rounded-full flex items-center justify-center text-teal-400 mx-auto mb-3">
+                    <svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-1">กรุณาปรับเทียบความไวการทำงาน (Baseline Calibration)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                    เพื่อประโยชน์ในการวิจัย ระบบต้องจับเวลาการลากวางขั้นพื้นฐานของนักศึกษา โดยให้นักศึกษาหยิบป้าย **"CALIBRATION BLOCK"** สีส้มขวามือ ลากไปวางที่เป้าหมายตรงกลางหน้าอกโครงร่างร่างกายก่อนเริ่มกรณีศึกษาจริงครับ
+                </p>
+                <div class="text-[10px] text-teal-400">ระบบพร้อมใช้งานแล้ว สามารถสแกนมือเพื่อลากได้ทันที</div>
+            </div>
+
+            <!-- กล่องแจ้งเตือนกล้องขัดข้อง (Camera Access Fallback UI) -->
+            <div id="camera-error-toast" class="hidden absolute inset-x-6 top-1/3 bg-slate-900 border border-rose-500/50 rounded-xl p-5 text-center shadow-2xl backdrop-blur max-w-md mx-auto z-20">
+                <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-1">ไม่สามารถเข้าใช้งานกล้องเว็บแคมได้</h3>
+                <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                    ระบบได้ปิดสเตจการดาวน์โหลด AI และเปิดใช้งาน **"โหมดเมาส์ / การสัมผัสหน้าจอ"** แทนโดยอัตโนมัติ เพื่อให้ท่านทำการศึกษาระบบจำลองและทำรายงานวิจัยต่อได้ทันทีครับ
+                </p>
+                <button id="btn-close-camera-error" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-4 py-2 rounded-lg font-medium transition duration-200">
+                    รับทราบและเริ่มทำแบบทดสอบ
+                </button>
             </div>
         </div>
 
@@ -127,41 +167,41 @@
             <div class="p-4 bg-teal-950/20 border-b border-teal-500/20">
                 <div class="flex justify-between items-center mb-1.5">
                     <span class="text-[10px] font-bold text-cyan-400 bg-cyan-950 border border-cyan-800 px-2 py-0.5 rounded uppercase tracking-wider">Clinical Case Study</span>
-                    <span id="case-index" class="text-xs font-bold text-slate-400 font-mono">Case 1 / 6</span>
+                    <span id="case-index" class="text-xs font-bold text-slate-400 font-mono">CALIBRATION</span>
                 </div>
-                <h3 id="case-title" class="text-sm font-bold text-white mb-1">... กำลังโหลดข้อมูลกรณีศึกษา ...</h3>
-                <p id="case-scenario" class="text-[11.5px] text-slate-300 leading-relaxed bg-slate-950/75 p-3 rounded border border-slate-850">
-                    ...
+                <h3 id="case-title" class="text-sm font-bold text-white mb-1">... ปรับเทียบระบบการทำงานทางสรีรวิทยา ...</h3>
+                <p id="case-scenario" class="text-[11.5px] text-slate-300 leading-relaxed bg-slate-950/75 p-3 rounded border border-slate-800">
+                    เพื่อไม่ให้วิจัยคลาดเคลื่อนกรุณาใช้มือหรือเมาส์คีบป้ายทดสอบลอยสีชมพู แล้วจัดวางลงเป้าหมายเพื่อวัดพิกัดความเร็วทางกล้ามเนื้อ (Baseline Motor Speed Test) ของนักศึกษาในสภาวะปกติก่อนครับ
                 </p>
             </div>
 
-            <!-- ตารางสั่นสัญญาณแจ้งเตือนอันตรายทางสรีรวิทยา (Nursing Hazard Display) -->
-            <div id="hazard-telemetry-panel" class="p-4 bg-slate-950/75 border-b border-slate-850 flex-1 flex flex-col justify-between min-h-[170px]">
+            <!-- ข้อบ่งชี้เตือนความปลอดภัยคลินิกและแท่นอาการ (Nursing Hazard Display) -->
+            <div id="hazard-telemetry-panel" class="p-4 bg-slate-950/75 border-b border-slate-800 flex-1 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex justify-between items-start mb-2">
-                        <span class="text-[9px] font-bold text-rose-500 bg-rose-950/50 border border-rose-900/30 px-2 py-0.5 rounded uppercase">Clinical Alert & Hazards</span>
-                        <span id="hazard-impact" class="text-[10px] font-medium text-rose-400">Waiting for response...</span>
+                        <span class="text-[9px] font-bold text-teal-500 bg-teal-950/50 border border-teal-900/30 px-2 py-0.5 rounded uppercase">AnatoAR Research Analytics</span>
+                        <span id="hazard-impact" class="text-[10px] font-medium text-teal-400">Calibration Progress</span>
                     </div>
-                    <h3 id="hazard-title" class="text-xs font-bold text-white mb-1.5 uppercase tracking-wide">ภัยคุกคามทางสรีรวิทยาและข้อผิดพลาดหัตถการ</h3>
+                    <h3 id="hazard-title" class="text-xs font-bold text-white mb-1.5 uppercase tracking-wide">ขั้นตอนวิเคราะห์วิจัยเชิงปริมาณ</h3>
                     <p id="hazard-desc" class="text-[11px] text-slate-400 leading-relaxed italic">
-                        "กรุณาวิเคราะห์โจทย์เคสข้างต้นและเลือกหยิบกระดูกโครงร่างที่เป็น 'แลนด์มาร์กอ้างอิงทางการพยาบาล' ที่ถูกต้อง เพื่อหลีกเลี่ยงภาวะแทรกซ้อนที่อาจเป็นอันตรายแก่ชีวิตผู้ป่วย..."
+                        "ระบบแยกแยะการสูญเสียการจับกล้องหรือป้ายหลุด (Motor Friction) ออกจากความล่าช้าจากการขบคิดโจทย์คัดเลือกกระดูก (Cognitive Latency) ส่งออกเพื่อนำความเชื่อมโยงไปวิเคราะห์ทางสถิติต่อเนื่องได้อย่างไร้รอยต่อ..."
                     </p>
                 </div>
                 
-                <div class="mt-4 pt-3 border-t border-slate-850 flex items-center justify-between">
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
                     <div class="flex items-center gap-1.5 text-xs text-slate-400">
                         <span class="w-2.5 h-2.5 rounded bg-amber-500 inline-block"></span>
-                        <span>ความสุ่มเสี่ยงความปลอดภัยทางคลินิก:</span>
+                        <span>สถิติก้าวหน้างานวิจัย:</span>
                     </div>
-                    <span id="hazard-level" class="text-xs font-bold text-amber-400 uppercase tracking-widest font-mono">PENDING</span>
+                    <span id="hazard-level" class="text-xs font-bold text-teal-400 uppercase tracking-widest font-mono">READY TO BEGIN</span>
                 </div>
             </div>
 
-            <!-- ส่วนของแผงเลือกป้ายคำศัพท์และปุ่มฟังก์ชันการส่งออกวิจัย -->
+            <!-- แท่นวางคำศัพท์และการส่งข้อมูลวิจัย CSV -->
             <div class="p-4 flex-1">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">คลังชิ้นกระดูกสำคัญ</h3>
-                    <span id="placed-counter" class="text-[10px] bg-slate-950 border border-slate-850 px-2 py-0.5 rounded text-slate-400 mono">0 / 6 COMPLETED</span>
+                    <span id="placed-counter" class="text-[10px] bg-slate-950 border border-slate-800 px-2 py-0.5 rounded text-slate-400 font-mono">0 / 6 COMPLETED</span>
                 </div>
                 
                 <div id="bone-palette" class="grid grid-cols-2 gap-1.5 max-h-[160px] lg:max-h-none overflow-y-auto pr-1">
@@ -175,7 +215,7 @@
                     </button>
                     <div class="grid grid-cols-2 gap-1.5">
                         <button id="btn-reset" class="py-1.5 bg-slate-950 border border-slate-800 text-[10px] font-medium rounded text-slate-400 hover:text-white transition">
-                            🔄 รีเซ็ตระบบใหม่ทั้งหมด
+                            🔄 ล้างสถิติวิจัยใหม่
                         </button>
                         <button id="btn-skip" class="py-1.5 bg-slate-950 border border-slate-800 text-[10px] font-medium rounded text-slate-400 hover:text-white transition">
                             ⏭️ ข้ามกรณีศึกษาถัดไป
@@ -186,48 +226,128 @@
         </div>
     </main>
 
-    <!-- ป๊อปอัปรายงานวิจัยส่วนบุคคลหลังจบภารกิจ (Research Result Modal) -->
+    <!-- ป๊อปอัปรายงานวิจัยส่วนบุคคลหลังจบภารกิจ (Research Telemetry Report Modal) -->
     <div id="success-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-40 flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 max-w-lg w-full shadow-2xl relative overflow-hidden">
-            <h2 class="text-xl font-bold text-white mb-1.5">🔬 สรุปบันทึกรายงานพฤติกรรมทางการพยาบาล</h2>
+            <h2 class="text-xl font-bold text-white mb-1">📊 รายงานสถิติวิจัยแยกแยะมิติการประเมิน</h2>
             <p class="text-slate-400 text-[11px] mb-4">ระบบทำการบันทึกและประมวลผลวิจัยความแม่นยำและการรับมือความเสี่ยงของนักศึกษาพยาบาลเรียบร้อยแล้ว:</p>
             
-            <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 grid grid-cols-3 gap-3 mb-4 text-center">
-                <div>
-                    <span class="text-[9px] text-slate-500 block uppercase">ความแม่นยำรวม</span>
-                    <div id="modal-accuracy" class="text-2xl font-bold text-emerald-400 mono">0%</div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 mb-4 text-xs">
+                <div class="flex justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-400">รหัสผู้เข้าร่วมการทดลอง (Participant ID):</span>
+                    <span id="modal-subject-id" class="font-bold text-teal-400 uppercase">B.S.N.-01</span>
                 </div>
-                <div class="border-l border-slate-850">
-                    <span class="text-[9px] text-slate-500 block uppercase">สุ่มพลาดรวม</span>
-                    <div id="modal-errors" class="text-2xl font-bold text-rose-400 mono">0 ครั้ง</div>
+                <div class="flex justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-400">เวลาปรับเทียบความคล่องแคล่ว (Baseline Motor Speed):</span>
+                    <span id="modal-baseline-speed" class="font-bold text-fuchsia-400 font-mono">0.00s</span>
                 </div>
-                <div class="border-l border-slate-850">
-                    <span class="text-[9px] text-slate-500 block uppercase">เวลาที่ใช้จบกิจกรรม</span>
-                    <div id="modal-time" class="text-2xl font-bold text-cyan-400 mono">0s</div>
+                <div class="flex justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-400">เวลาเฉลี่ยที่ใช้คิดวิเคราะห์ (Mean Decision Time):</span>
+                    <span id="modal-mean-decision" class="font-bold text-emerald-400 font-mono">0.00s</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-400">เวลาเฉลี่ยของการลากวางเสมือนจริง (Mean AR Execution Time):</span>
+                    <span id="modal-mean-execution" class="font-bold text-fuchsia-400 font-mono">0.00s</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-400">อัตราทำผิดเชิงพยาธิสภาพความรู้ (Cognitive Errors):</span>
+                    <span id="modal-cog-errors" class="font-bold text-rose-400 font-mono">0 ครั้ง</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-400">จำนวนครั้งที่ป้ายหลุดจากเหตุกล้อง (Motor Drops/Loss):</span>
+                    <span id="modal-mot-drops" class="font-bold text-fuchsia-400 font-mono">0 ครั้ง</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-400">จำนวนความผิดพลาดสะสมรวม (Total Errors):</span>
+                    <span id="modal-errors" class="font-bold text-rose-400 font-mono">0 ครั้ง</span>
                 </div>
             </div>
 
             <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg mb-6">
-                <span class="text-[10px] text-teal-400 font-bold block uppercase mb-1">📋 บทประเมินเพื่อการจัดระดับทักษะพยาบาล:</span>
+                <span class="text-[10px] text-teal-400 font-bold block uppercase mb-1">📋 นัยสำคัญทางการศึกษาวิจัย:</span>
                 <p id="evaluation-text" class="text-[11.5px] text-slate-300 leading-relaxed italic">
-                    ...กำลังประมวลความแม่นยำ...
+                    ...กำลังวิเคราะห์ความแตกต่างของค่าเฉลี่ยสถิติเชิงลึก...
                 </p>
             </div>
 
             <div class="flex gap-2">
-                <button id="btn-modal-export" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-2.5 rounded-lg text-xs hover:shadow-lg transition">
-                    ดาวน์โหลดตารางข้อมูลดิบเพื่อวิจัยวิจัย (.CSV)
+                <button id="btn-modal-export" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-2.5 rounded-lg text-xs hover:shadow-lg transition duration-200">
+                    💾 ดาวน์โหลดข้อมูลความแม่นยำ (.CSV)
                 </button>
-                <button onclick="document.getElementById('success-modal').classList.add('hidden')" class="px-4 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold transition">
-                    ปิดหน้าต่าง
+                <button id="btn-close-modal" class="px-4 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-lg text-xs font-semibold transition duration-200">
+                    กลับสู่หน้าแรก
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- โทสต์แจ้งเตือนแบบดั้งเดิมทดแทนเบราว์เซอร์แจ้งเตือน (Custom Notification Toast UI) -->
+    <div id="custom-toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 border border-teal-500/40 px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center gap-2.5 max-w-sm">
+        <div id="toast-icon" class="text-sm shrink-0">ℹ️</div>
+        <p id="toast-text" class="text-slate-200 leading-normal font-medium"></p>
+    </div>
+
     <!-- โค้ดกลไกควบคุมและประมวลผลทั้งหมดด้วยภาษา JavaScript -->
     <script>
-        // --- 1. แหล่งฐานข้อมูลคำศัพท์กระดูกและข้อบ่งชี้ทางคลินิก (Nursing Anatomy Dataset) ---
+        // --- 1. การสร้างสไตล์เสียงเอฟเฟกต์เชิงการแพทย์ ---
+        // ปรับปรุง: ย้ายประกาศฟังก์ชันโครงสร้าง SoundEffects ขึ้นมาด้านบนสุดก่อนที่จะถูกเรียกใช้งาน (แก้บั๊ก SoundEffects is not defined)
+        function SoundEffects() {
+            this.ctx = null;
+            this.init = function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            };
+            this.playGrab = function() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(350, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.12);
+                g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.12);
+            };
+            this.playCorrect = function() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(523, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.16);
+                g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.35);
+            };
+            this.playIncorrect = function() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(90, this.ctx.currentTime + 0.3);
+                g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+            };
+            this.playVictory = function() {
+                this.init(); if (!this.ctx) return;
+                const notes = [523, 659, 784, 1046];
+                notes.forEach((freq, idx) => {
+                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.15);
+                    g.gain.setValueAtTime(0.1, this.ctx.currentTime + idx * 0.15);
+                    g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.15 + 0.4);
+                    osc.connect(g); g.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.15);
+                    osc.stop(this.ctx.currentTime + idx * 0.15 + 0.4);
+                });
+            };
+        }
+
+        // --- 2. การสร้างเสียงแจ้งเตือนเสมือนจริง ---
+        const sfx = new SoundEffects();
+
+        // --- 3. แหล่งฐานข้อมูลคำศัพท์กระดูกและข้อบ่งชี้ทางคลินิก (Nursing Anatomy Dataset) ---
         const BONE_DATA = [
             {
                 id: "clavicle",
@@ -301,7 +421,7 @@
             }
         ];
 
-        // รายชื่อโจทย์กรณีศึกษาทางการพยาบาลเพื่อวัดทักษะการวิเคราะห์ (BSN Case Simulations)
+        // โจทย์จำลองพฤติกรรมคนไข้เพื่อประเมินความปลอดภัยพยาบาล (B.S.N. Clinical Cases)
         const CLINICAL_CASES = [
             {
                 id: "case_cpr",
@@ -329,7 +449,7 @@
                 title: "เคสที่ 4: การประเมินจุดฉีดยากล้ามเนื้อสะโพกปลอดภัย (Ventrogluteal Site)",
                 scenario: "คนไข้รับคำสั่งฉีดยาฆ่าเชื้อขนาด 2.5 mL เข้ากล้ามเนื้อลึก พยาบาลต้องการเลือกจุด 'Ventrogluteal Site' เพื่อลดความเสี่ยงแทงเข็มทะลุเส้นประสาทและเส้นเลือดใหญ่ที่ก้น โดยพยาบาลต้องกางนิ้วชี้ทาบขอบยอดปีกกระดูกเชิงกรานชิ้นใดในกายวิภาคศาสตร์เพื่อเล็ง?",
                 targetId: "pelvis_crest",
-                guideline: "ให้นักศึกษาลาก 'ปีกเชิงกราน (Iliac Crest)' มาวางเพื่อระบุพิกัดเป้าแลนด์มาร์กในการทาบนิ้วมือเล็งฉีดยา"
+                guideline: "ให้นักศึกษาลาก 'ปีกเชิงกราน (Iliac Crest)' มาวางเพื่อระบุพิกัดเป้าแลนด์มาร์กในการทาบนนิ้วมือเล็งฉีดยา"
             },
             {
                 id: "case_im_pediatric",
@@ -347,48 +467,15 @@
             }
         ];
 
-        // --- 2. การสร้างเสียงสังเคราะห์ Web Audio API ---
-        const sfx = new SoundEffects();
-
-        // --- 3. ตัวแปรเก็บสถิตินักศึกษา (Research Telemetry State) ---
-        let researchLogs = []; 
-        let startTime = Date.now();
-        let totalAttempts = 0;
-        let successfulMatches = 0;
-        let totalErrors = 0;
-
-        let activeCaseIndex = 0;
-        let inputMode = "AR"; 
-        let boneItems = [];
-        let activeDraggedId = null;
-
-        let cursorX = 0;
-        let cursorY = 0;
-        let isPinching = false;
-        let isHandDetected = false;
-        let handLandmarks = null;
-        
-        let grabOffsetX = 0;
-        let grabOffsetY = 0;
-
-        const videoElement = document.getElementById('webcam');
-        const canvasElement = document.getElementById('game-canvas');
-        const canvasCtx = canvasElement.getContext('2d');
-        const paletteContainer = document.getElementById('bone-palette');
-        const placedCounterEl = document.getElementById('placed-counter');
-
-        const factTitle = document.getElementById('fact-title');
-        const factLatin = document.getElementById('fact-latin');
-        const factDesc = document.getElementById('fact-desc');
-
-        // --- 4. ฟังก์ชันสำหรับการวาดแบบจำลองโครงร่างร่างกายเชิงคลินิก ---
+        // --- 3.5 ฟังก์ชันสำหรับการวาดแบบจำลองโครงร่างอนาโตมิกชั้นสูง (Detailed Skeletal Draw) ---
+        // ปรับปรุง: กู้คืนและติดตั้งฟังก์ชัน drawVectorSkeleton กลับคืนสู่ระบบเพื่อแก้ไข ReferenceError
         function drawVectorSkeleton(ctx, centerX, width, height) {
             ctx.save();
             ctx.strokeStyle = "rgba(100, 116, 139, 0.4)";
             ctx.lineWidth = 2.5;
             ctx.fillStyle = "rgba(226, 232, 240, 0.85)";
 
-            // 1. หัวกะโหลก
+            // 1. หัวกะโหลกพร้อมระบุกระดูกรอยประสาน
             const headY = height * 0.14;
             const headRadius = Math.min(width, height) * 0.055;
             ctx.beginPath();
@@ -396,6 +483,7 @@
             ctx.fill();
             ctx.stroke();
 
+            // ขากรรไกรล่าง
             ctx.beginPath();
             ctx.rect(centerX - headRadius * 0.55, headY - 12 + headRadius * 0.75, headRadius * 1.1, headRadius * 0.55);
             ctx.fill();
@@ -460,7 +548,7 @@
             ctx.arc(centerX + pelvisW*0.6, pelvisY - pelvisW*0.1, 10, Math.PI * 1.3, Math.PI * 0.3);
             ctx.stroke();
 
-            // 6. แขนด้านซ้ายและขวา
+            // 6. แขนด้านซ้ายและขวา (Humerus)
             const elbowY = height * 0.43;
             ctx.lineWidth = 5;
             ctx.strokeStyle = "rgba(226, 232, 240, 0.85)";
@@ -517,61 +605,65 @@
             ctx.restore();
         }
 
-        // --- 5. การสร้างสไตล์เสียงเอฟเฟกต์เชิงการแพทย์ ---
-        function SoundEffects() {
-            this.ctx = null;
-            this.init = function() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            };
-            this.playGrab = function() {
-                this.init(); if (!this.ctx) return;
-                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                osc.type = 'sine'; osc.frequency.setValueAtTime(350, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.15);
-                g.gain.setValueAtTime(0.08, this.ctx.currentTime);
-                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.15);
-            };
-            this.playCorrect = function() {
-                this.init(); if (!this.ctx) return;
-                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(523, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.08);
-                osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.16);
-                g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.35);
-            };
-            this.playIncorrect = function() {
-                this.init(); if (!this.ctx) return;
-                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(90, this.ctx.currentTime + 0.3);
-                g.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
-            };
-            this.playVictory = function() {
-                this.init(); if (!this.ctx) return;
-                const notes = [523, 659, 784, 1046];
-                notes.forEach((freq, idx) => {
-                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.15);
-                    g.gain.setValueAtTime(0.1, this.ctx.currentTime + idx * 0.15);
-                    g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.15 + 0.4);
-                    osc.connect(g); g.connect(this.ctx.destination);
-                    osc.start(this.ctx.currentTime + idx * 0.15);
-                    osc.stop(this.ctx.currentTime + idx * 0.15 + 0.4);
-                });
-            };
-        }
+        // --- 4. ระบบจัดแบ่งตัวแปรวิจัยเพื่อจัดเตรียม Telemetry (Variable Separation State) ---
+        let researchLogs = []; 
+        let currentActivityState = "CALIBRATION"; // "CALIBRATION" หรือ "ACTIVE_RESEARCH"
+        let startTime = Date.now(); // ประกาศเวลาเริ่มต้นระบบหลักสำหรับงานวิจัยที่นี่ (แก้บั๊ก startTime is not defined)
+        
+        let baselineMotorSpeed = 0.0; // ความเร็วของกล้ามเนื้อและการคุมกล้องเบื้องต้น (หน่วยวินาที)
+        let calibrationStartTime = 0;
 
-        // --- 6. การกระจายป้ายคำศัพท์และกำหนดพิกัดความละเอียดหน้าจอ ---
+        // ตัวแปรจับเวลาสำหรับประเมินความรู้เชิงลึก (Split Timer Variables)
+        let caseLoadTime = 0;           // เวลาเปิดโจทย์เคสปัจจุบัน
+        let correctBoneFirstGrabTime = 0; // วินาทีแรกที่คีบโดนกระดูกที่ถูกต้องสำหรับเคสปัจจุบัน
+        
+        let currentDecisionTime = 0.0;   // ผลรวมเวลาคิดวิเคราะห์โจทย์จนคีบถูก (Decision Time)
+        let currentExecutionTime = 0.0;  // ผลรวมเวลาควบคุมลากวางจริง (Execution Time)
+
+        let totalCognitiveErrors = 0;    // ตอบผิดเชิงความรู้กายวิภาค
+        let totalMotorDrops = 0;         // ทำหลุดมือ / กล้องสูญเสียการจับ (Fumble/Technical Errors)
+        let totalErrors = 0;             // ข้อผิดพลาดรวม (Cognitive Errors + Motor Drops)
+        let totalAttempts = 0;           // จำนวนครั้งที่พยายามลากวางรวม
+        let successfulMatches = 0;       // จำนวนครั้งที่จับคู่สำเร็จ
+
+        let activeCaseIndex = 0;
+        let inputMode = "AR"; 
+        let boneItems = [];
+        let activeDraggedId = null;
+
+        // วัตถุจำลองเพื่อปรับเทียบกล้ามเนื้อช่วงเริ่มต้น (Calibration Test Block)
+        let calibrationBlock = {
+            id: "calibration_block",
+            currentX: 0,
+            currentY: 0,
+            width: 140,
+            height: 40,
+            isPlaced: false,
+            nameTh: "CALIBRATION BLOCK",
+            nameEn: "Drag me to target",
+            isHovered: false
+        };
+
+        let cursorX = 0;
+        let cursorY = 0;
+        let isPinching = false;
+        let isHandDetected = false;
+        let handLandmarks = null;
+        
+        let grabOffsetX = 0;
+        let grabOffsetY = 0;
+
+        const videoElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('game-canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const paletteContainer = document.getElementById('bone-palette');
+        const placedCounterEl = document.getElementById('placed-counter');
+
+        const factTitle = document.getElementById('fact-title');
+        const factLatin = document.getElementById('fact-latin');
+        const factDesc = document.getElementById('fact-desc');
+
+        // --- 5. การกระจายป้ายคำศัพท์และกำหนดพิกัดการเรียนรู้ ---
         function initBoneItems() {
             const w = canvasElement.width || 800;
             const h = canvasElement.height || 600;
@@ -599,6 +691,7 @@
 
         function loadCase(idx) {
             if (idx >= CLINICAL_CASES.length) {
+                // จบหลักสูตรประเมิน ให้สรุปรายงานวิจัย
                 triggerResearchEnd();
                 return;
             }
@@ -607,6 +700,7 @@
             document.getElementById('case-title').innerText = item.title;
             document.getElementById('case-scenario').innerText = item.scenario;
 
+            // คืนสถานะกระดานแจ้งเตือน
             document.getElementById('hazard-title').innerText = "Nursing Clinical Status";
             document.getElementById('hazard-desc').innerText = `แนวทางการทำภารกิจวิจัย: ${item.guideline}`;
             document.getElementById('hazard-level').innerText = "PENDING";
@@ -632,6 +726,7 @@
                 `;
                 
                 card.addEventListener('click', () => {
+                    // คลิกเพื่อวิเคราะห์และทบทวนรายละเอียดชีววิทยากระดูก
                     document.getElementById('hazard-title').innerText = item.nameTh + " (" + item.nameEn + ")";
                     document.getElementById('hazard-desc').innerText = `รายละเอียดชีวเวช: ${item.fact} \nภัยวิกฤต: ${item.hazard}`;
                     document.getElementById('hazard-level').innerText = item.hazardLevel;
@@ -644,10 +739,10 @@
             });
 
             const placedCount = boneItems.filter(b => b.isPlaced).length;
-            placedCounterEl.innerText = `${placedCount} / ${CLINICAL_CASES.length} ชิ้นที่ตอบถูก`;
+            placedCounterEl.innerText = `วางสำเร็จ ${placedCount} / ${boneItems.length} ชิ้น`;
         }
 
-        // --- 7. ระบบวิเคราะห์พฤติกรรมการตอบกลับและตรวจสอบแลนด์มาร์ก ---
+        // --- 6. ระบบวิเคราะห์ความเข้ากันและลอจิกพฤติกรรมการตอบกลับ ---
         function checkTargetPlacement(itemId) {
             const currentCase = CLINICAL_CASES[activeCaseIndex];
             const item = boneItems.find(b => b.id === itemId);
@@ -663,6 +758,7 @@
             totalAttempts++;
 
             if (item.id === currentCase.targetId && distance < successThreshold) {
+                // ตอบได้ถูกต้องตามหลักพยาธิพยาบาล
                 item.currentX = targetX;
                 item.currentY = targetY;
                 item.isPlaced = true;
@@ -670,21 +766,26 @@
                 
                 sfx.playCorrect();
 
+                // อัปเดตตารางสรุปผลด้านข้างคนไข้
                 document.getElementById('hazard-title').innerText = "🎉 สำเร็จภารกิจทางการพยาบาล!";
                 document.getElementById('hazard-desc').innerText = `พยาบาลวิเคราะห์ถูกต้อง! กระดูก ${item.nameTh} เป็นตำแหน่งระบุขอบเขตแลนด์มาร์กที่แพทย์กำหนด \n\nข้อคำนึง: ${item.fact}`;
                 document.getElementById('hazard-level').innerText = "SAFE";
                 document.getElementById('hazard-level').className = "text-xs font-bold text-emerald-400 uppercase tracking-widest font-mono";
                 document.getElementById('hazard-impact').innerText = "Procedure completed safely";
 
+                // จัดเก็บข้อมูลลงฐานบันทึกวิจัย Telemetry
                 logResearchAction(currentCase.id, item.id, "SUCCESS", totalAttempts);
+
                 updateSidebarPalette();
 
+                // ข้ามไปยังเคสต่อไปโดยหน่วงเวลา 3 วินาทีเพื่อให้ผู้เรียนอ่าน Notes
                 setTimeout(() => {
                     activeCaseIndex++;
                     loadCase(activeCaseIndex);
                 }, 3200);
 
             } else {
+                // ตอบผิดตำแหน่งหรือหยิบแผ่นผิดประเภททางการพยาบาล
                 totalErrors++;
                 sfx.playIncorrect();
 
@@ -697,6 +798,7 @@
                 logResearchAction(currentCase.id, item.id, "FAILURE", totalAttempts);
                 updateStats();
 
+                // สปริงกลับที่ตั้งเริ่มต้น
                 resetCardPosition(item);
             }
             updateStats();
@@ -714,7 +816,7 @@
             item.currentY = 85 + (rowIndex * ((h - 170) / rowCount));
         }
 
-        // --- 8. การเก็บบันทึกสถิติเพื่อส่งออกผลงานวิจัย ---
+        // --- 7. การเก็บบันทึกสถิติเพื่อส่งออกผลงานวิจัย ---
         function logResearchAction(caseId, selectedBoneId, result, attemptNumber) {
             const durationSinceStart = Math.floor((Date.now() - startTime) / 1000);
             
@@ -732,11 +834,45 @@
 
         function updateStats() {
             const accuracy = totalAttempts > 0 ? Math.round((successfulMatches / totalAttempts) * 100) : 0;
-            document.getElementById('stat-accuracy').innerText = `${accuracy}%`;
-            document.getElementById('stat-errors').innerText = `${totalErrors} ครั้ง`;
+            
+            // เพิ่มการตรวจสอบ Null-checks เพื่อแก้ปัญหาสติถิ HTML หายไป
+            const statAccuracy = document.getElementById('stat-accuracy');
+            if (statAccuracy) statAccuracy.innerText = `${accuracy}%`;
+            
+            const statErrors = document.getElementById('stat-errors');
+            if (statErrors) statErrors.innerText = `${totalErrors} ครั้ง`;
             
             const duration = Math.floor((Date.now() - startTime) / 1000);
-            document.getElementById('stat-duration').innerText = `${duration}s`;
+            const statDuration = document.getElementById('stat-duration');
+            if (statDuration) statDuration.innerText = `${duration}s`;
+        }
+
+        function updateStatsDisplay() {
+            const accuracy = totalAttempts > 0 ? Math.round((successfulMatches / totalAttempts) * 100) : 0;
+            
+            // อัปเดตสถิติมิติ Cognitive
+            const cognitiveErrors = document.getElementById('metric-cognitive-errors');
+            if (cognitiveErrors) cognitiveErrors.innerText = `${totalCognitiveErrors} ครั้ง`;
+            
+            const meanDecision = activeCaseIndex > 0 ? (currentDecisionTime / activeCaseIndex).toFixed(2) : "0.00";
+            const decisionTime = document.getElementById('metric-decision-time');
+            if (decisionTime) decisionTime.innerText = `${meanDecision}s`;
+
+            // อัปเดตสถิติมิติ Motor
+            const motorDrops = document.getElementById('metric-motor-drops');
+            if (motorDrops) motorDrops.innerText = `${totalMotorDrops} ครั้ง`;
+            
+            const meanExecution = activeCaseIndex > 0 ? (currentExecutionTime / activeCaseIndex).toFixed(2) : "0.00";
+            const executionTime = document.getElementById('metric-execution-time');
+            if (executionTime) executionTime.innerText = `${meanExecution}s`;
+
+            // อัปเดตรวมระยะเวลาเชิง Null-safe
+            const duration = Math.floor((Date.now() - startTime) / 1000);
+            const statDuration = document.getElementById('stat-duration');
+            if (statDuration) statDuration.innerText = `${duration}s`;
+            
+            const statAccuracy = document.getElementById('stat-accuracy');
+            if (statAccuracy) statAccuracy.innerText = `${accuracy}%`;
         }
 
         function exportResearchCSV() {
@@ -767,6 +903,7 @@
         setInterval(() => {
             if (activeCaseIndex < CLINICAL_CASES.length) {
                 updateStats();
+                updateStatsDisplay(); // ซิงโครไนซ์บอร์ดหลัก
             }
         }, 1000);
 
@@ -792,9 +929,14 @@
             const accuracy = totalAttempts > 0 ? Math.round((successfulMatches / totalAttempts) * 100) : 0;
             const duration = Math.floor((Date.now() - startTime) / 1000);
 
-            document.getElementById('modal-accuracy').innerText = `${accuracy}%`;
-            document.getElementById('modal-errors').innerText = `${totalErrors} ครั้ง`;
-            document.getElementById('modal-time').innerText = `${duration} วินาที`;
+            const modalAccuracy = document.getElementById('modal-accuracy');
+            if (modalAccuracy) modalAccuracy.innerText = `${accuracy}%`;
+
+            const modalErrors = document.getElementById('modal-errors');
+            if (modalErrors) modalErrors.innerText = `${totalErrors} ครั้ง`;
+
+            const modalTime = document.getElementById('modal-time');
+            if (modalTime) modalTime.innerText = `${duration} วินาที`;
 
             let feedText = "";
             if (accuracy >= 80 && totalErrors <= 1) {
@@ -914,6 +1056,8 @@
                 onFrame: async () => {
                     if (inputMode === "AR") {
                         await handsAI.send({ image: videoElement });
+                    } else {
+                        renderFrameWithoutAI();
                     }
                 },
                 width: 640,
@@ -923,7 +1067,6 @@
             cameraHelper.start()
                 .then(() => {
                     document.getElementById('loading-screen').classList.add('hidden');
-                    // เริ่มต้น Render Loop หลอมรวมเสถียรภาพภาพ
                     renderLoop();
                 })
                 .catch(err => {
@@ -934,7 +1077,6 @@
                 });
         }
 
-        // ส่วนของการรับค่าการเคลื่อนไหวเพื่อคำนวณตำแหน่ง (Data-Only Processor)
         function onHandTrackingResults(results) {
             if (inputMode !== "AR") {
                 isHandDetected = false;
@@ -951,7 +1093,7 @@
 
                 const thumbTip = handLandmarks[4];
                 const indexTip = handLandmarks[8];
-                const middleTip = handLandmarks[12]; 
+                const middleTip = handLandmarks[12];
 
                 const realX = (1 - indexTip.x) * canvasElement.width;
                 const realY = indexTip.y * canvasElement.height;
@@ -959,6 +1101,7 @@
                 cursorX = realX;
                 cursorY = realY;
 
+                // ตรวจหาท่าจีบนิ้ว (Pinch) แบบ 2D เพื่อเลี่ยงความแกว่งไกวทางกายภาพ
                 const indexThumbDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y) / handScale;
                 const middleThumbDist = Math.hypot(thumbTip.x - middleTip.x, thumbTip.y - middleTip.y) / handScale;
 
@@ -1006,10 +1149,64 @@
                         }
                     }
                 }
+
+                boneItems.forEach(item => {
+                    if (!item.isPlaced) {
+                        item.isHovered = (
+                            cursorX >= item.currentX - item.width/2 && 
+                            cursorX <= item.currentX + item.width/2 &&
+                            cursorY >= item.currentY - item.height/2 && 
+                            cursorY <= item.currentY + item.height/2
+                        );
+                    }
+                });
+
+                drawVirtualHandSkeleton(canvasCtx, handLandmarks);
             } else {
-                isHandDetected = false;
-                handLandmarks = null;
+                boneItems.forEach(item => item.isHovered = false);
             }
+
+            drawInteractiveItemsAndTargets();
+            drawGlowingCursor();
+        }
+
+        // กรณีฉุกเฉินกล้องไม่พร้อมหรือเลือกโหมดสัมผัส
+        function renderFrameWithoutAI() {
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                canvasCtx.translate(canvasElement.width, 0);
+                canvasCtx.scale(-1, 1);
+                canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.restore();
+            } else {
+                const grad = canvasCtx.createLinearGradient(0, 0, canvasElement.width, canvasElement.height);
+                grad.addColorStop(0, '#020617');
+                grad.addColorStop(1, '#0b1329');
+                canvasCtx.fillStyle = grad;
+                canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.restore();
+            }
+
+            const centerX = canvasElement.width / 2;
+            drawVectorSkeleton(canvasCtx, centerX, canvasElement.width, canvasElement.height);
+            
+            boneItems.forEach(item => {
+                if (!item.isPlaced) {
+                    item.isHovered = (
+                        cursorX >= item.currentX - item.width/2 && 
+                        cursorX <= item.currentX + item.width/2 &&
+                        cursorY >= item.currentY - item.height/2 && 
+                        cursorY <= item.currentY + item.height/2
+                    );
+                }
+            });
+
+            drawInteractiveItemsAndTargets();
+            drawGlowingCursor();
+
+            requestAnimationFrame(renderFrameWithoutAI);
         }
 
         // --- 11. สุดยอด Master Render Loop สลายอาการค้าง หน่วง และหน่วยความจำพุ่งกระฉูด ---
@@ -1219,13 +1416,15 @@
             fingerConnections.forEach(chain => {
                 ctx.beginPath();
                 for (let i = 0; i < chain.length; i++) {
-                    const id = chain[i]; // แก้ไขปัญหา ReferenceError ที่เคยเกิดขึ้น ณ จุดนี้
+                    const id = chain[i]; 
                     const pt = landmarks[id];
-                    const pxX = (1 - pt.x) * canvasElement.width;
-                    const pxY = pt.y * canvasElement.height;
-                    
-                    if (i === 0) ctx.moveTo(pxX, pxY);
-                    else ctx.lineTo(pxX, pxY);
+                    if (pt) {
+                        const pxX = (1 - pt.x) * canvasElement.width;
+                        const pxY = pt.y * canvasElement.height;
+                        
+                        if (i === 0) ctx.moveTo(pxX, pxY);
+                        else ctx.lineTo(pxX, pxY);
+                    }
                 }
                 ctx.stroke();
             });
