@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnatoAR - เกมกายวิภาคระบบกระดูก AR (เวอร์ชันปรับปรุงความแม่นยำ)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Thai & English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- MediaPipe Hands & Camera Utils -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+        .mono {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        @keyframes scan {
+            0% { transform: translateY(-10%); }
+            50% { transform: translateY(110%); }
+            100% { transform: translateY(-10%); }
+        }
+        .scan-line {
+            animation: scan 6s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 overflow-hidden h-full flex flex-col select-none">
+
+    <!-- บล็อกแสดงสถานะการโหลดโมเดล MediaPipe AI -->
+    <div id="loading-screen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center">
+        <div class="relative w-24 h-24 mb-6">
+            <div class="absolute inset-0 rounded-full border-4 border-cyan-500/20 border-t-cyan-500 animate-spin"></div>
+            <div class="absolute inset-2 rounded-full border-4 border-fuchsia-500/10 border-b-fuchsia-500 animate-spin" style="animation-direction: reverse;"></div>
+            <div class="absolute inset-4 flex items-center justify-center">
+                <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400 mb-2">กำลังโหลดระบบนำร่องสมจริง AR</h2>
+        <p class="text-slate-400 max-w-md text-sm mb-4">ระบบกำลังดาวน์โหลดวิทยากรตรวจจับข้อต่อโครงนิ้วมือ AI ความแม่นยำสูง (MediaPipe Hands)...</p>
+        <div class="w-64 bg-slate-800 h-2 rounded-full overflow-hidden">
+            <div class="bg-cyan-500 h-full w-0 animate-pulse" id="loading-bar" style="width: 55%"></div>
+        </div>
+    </div>
+
+    <!-- ส่วนหัว (Header) -->
+    <header class="bg-slate-900 border-b border-slate-800 py-3 px-6 flex justify-between items-center z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-cyan-500/20 p-2 rounded-lg text-cyan-400 border border-cyan-500/30">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-300">AnatoAR - ระบบกระดูกจำลอง</h1>
+                <p class="text-xs text-slate-400">โครงการวิทยาศาสตร์กายวิภาคและการโต้ตอบ AR อัจฉริยะ</p>
+            </div>
+        </div>
+        
+        <!-- ตัวเลือกสถานะโหมดอินพุต -->
+        <div class="flex items-center gap-3 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+            <button id="btn-ar-mode" class="px-3 py-1.5 rounded-md text-xs font-medium transition duration-200 bg-cyan-650 text-cyan-400 border border-cyan-500/30 shadow-[0_0_12px_rgba(34,211,238,0.2)] flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-400 animate-ping inline-block"></span>
+                <span>โหมด AR ตรวจจับมือ</span>
+            </button>
+            <button id="btn-mouse-mode" class="px-3 py-1.5 rounded-md text-xs font-medium transition duration-200 text-slate-400 hover:text-white flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                <span>โหมดเมาส์ / สัมผัส</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- หน้าต่างการเรียนรู้หลัก -->
+    <main class="flex-1 flex flex-col md:flex-row relative overflow-hidden">
+        
+        <!-- พื้นที่แสดงกล้อง AR และ Canvas เล่นเกม (ฝั่งซ้าย) -->
+        <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden min-h-[350px]">
+            <!-- ซ่อนแท็ก Video ตัวจริงเพื่อความเรียบร้อย แล้วนำภาพไปวาดลง Canvas แทน -->
+            <video id="webcam" class="hidden" autoplay playsinline></video>
+            
+            <!-- Canvas หลักสำหรับการเรนเดอร์ภาพจากกล้อง (สะท้อน X), ข้อต่อกระดูกมือ และองค์ประกอบเกม -->
+            <canvas id="game-canvas" class="absolute inset-0 w-full h-full object-cover z-0"></canvas>
+            
+            <!-- ชั้นแสดงเอฟเฟกต์แอนิเมชันสแกนเพื่อความเป็น Sci-Fi AR -->
+            <div class="absolute inset-x-0 h-[2px] bg-cyan-400/50 shadow-[0_0_15px_#22d3ee] scan-line pointer-events-none z-1"></div>
+            
+            <!-- คู่มือนำทางการเล่น 4 ขั้นตอนบนภาพจอ (Overlay Setup) -->
+            <div id="play-guide-overlay" class="absolute bottom-4 left-4 z-10 max-w-sm bg-slate-950/90 border border-cyan-500/30 p-3.5 rounded-xl shadow-2xl backdrop-blur-sm">
+                <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping"></span>
+                    วิธีกดเล่นในโหมด AR (กล้องมือเปล่า)
+                </h4>
+                <ol class="text-[11px] text-slate-300 space-y-1.5 list-decimal list-inside">
+                    <li>เลื่อน <span class="text-cyan-400 font-semibold">เป้าเล็งสีฟ้า (นิ้วชี้)</span> ไปชี้ทับป้ายกระดูก</li>
+                    <li>ป้ายจะ <span class="text-fuchsia-400 font-semibold">เรืองแสงชมพู</span> แปลว่ามือสัมผัสโดนแล้ว</li>
+                    <li><span class="text-emerald-400 font-semibold">จีบนิ้วโป้ง + นิ้วชี้</span> เข้าหากันค้างไว้ เพื่อคีบหยิบป้าย</li>
+                    <li>ลากไปทับ <span class="text-cyan-400 font-semibold">เป้ากลม ⊕</span> บนโครงกระดูก แล้วปล่อยนิ้วเพื่อวาง!</li>
+                </ol>
+            </div>
+
+            <!-- UI แสดงคะแนนและเวลาในพื้นที่ AR -->
+            <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
+                <div class="bg-slate-900/90 backdrop-blur border border-cyan-500/30 rounded-xl px-4 py-2 flex items-center gap-3">
+                    <div class="text-xs uppercase text-slate-400 tracking-wider">โหมดกิจกรรม:</div>
+                    <div id="display-mode-tag" class="text-sm font-semibold text-cyan-400">🔬 โหมดเรียนรู้คำศัพท์</div>
+                </div>
+                <div class="bg-slate-900/90 backdrop-blur border border-slate-800 rounded-xl px-4 py-2 flex items-center gap-4">
+                    <div>
+                        <div class="text-[10px] uppercase text-slate-400 tracking-wider">คะแนนสอบ</div>
+                        <div id="game-score" class="text-2xl font-bold text-emerald-400 mono leading-none">000</div>
+                    </div>
+                    <div class="border-l border-slate-800 pl-4">
+                        <div class="text-[10px] uppercase text-slate-400 tracking-wider">เวลาคงเหลือ</div>
+                        <div id="game-timer" class="text-2xl font-bold text-rose-400 mono leading-none">--:--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- การแจ้งเตือนสถานะเมื่อเปิดกล้องไม่ได้ -->
+            <div id="camera-error-toast" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 max-w-sm bg-red-950/90 backdrop-blur border border-red-500/50 p-4 rounded-xl text-center">
+                <svg class="w-10 h-10 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <h4 class="text-sm font-semibold text-red-200 mb-1">ไม่สามารถเข้าถึงกล้องถ่ายภาพได้</h4>
+                <p class="text-xs text-red-400 mb-3">แต่ไม่ต้องกังวล! ระบบได้เปิดใช้ "โหมดสัมผัส/เมาส์" แทน เพื่อให้คุณเรียนรู้ระบบกระดูกได้ทันที</p>
+                <button onclick="document.getElementById('camera-error-toast').classList.add('hidden')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">ตกลง</button>
+            </div>
+        </div>
+
+        <!-- รายละเอียดวิชาการ แผงควบคุมและคลังข้อมูลกระดูก (ฝั่งขวา) -->
+        <div class="w-full md:w-96 bg-slate-900 border-t md:border-t-0 md:border-l border-slate-800 flex flex-col shrink-0 z-10 overflow-y-auto">
+            
+            <!-- แท็บการควบคุมกิจกรรม -->
+            <div class="p-4 border-b border-slate-800">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">ขั้นตอนโครงงานกายวิภาค</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-mode-study" class="py-2 px-3 rounded-lg text-xs font-semibold text-center border transition-all duration-200 bg-cyan-950 border-cyan-500/50 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]">
+                        🔬 1. เรียนรู้คำศัพท์
+                    </button>
+                    <button id="btn-mode-game" class="py-2 px-3 rounded-lg text-xs font-semibold text-center border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200 transition-all duration-200">
+                        🎮 2. เกมท้าทายเวลา
+                    </button>
+                </div>
+            </div>
+
+            <!-- กล่องแสดงข้อเท็จจริงทางการแพทย์ (Anatomy Fact Sheet) -->
+            <div id="fact-sheet-container" class="p-4 bg-slate-950/50 border-b border-slate-800 flex-1 flex flex-col justify-between min-h-[160px]">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-bold text-cyan-500 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded uppercase">ข้อมูลวิทยาศาสตร์แพทย์</span>
+                        <span id="fact-latin" class="text-xs font-medium text-slate-400 italic">Anatomy Term</span>
+                    </div>
+                    <h3 id="fact-title" class="text-lg font-bold text-white mb-2">โครงกระดูกมนุษย์ (The Skeleton)</h3>
+                    <p id="fact-desc" class="text-xs text-slate-300 leading-relaxed">โครงสร้างหลักที่แข็งแรงของร่างกายมนุษย์ ซึ่งคอยปกป้องอวัยวะภายในอันสำคัญ ช่วยอำนวยความสะดวกในการเคลื่อนไหว และผลิตเม็ดเลือดแดงผ่านไขกระดูก</p>
+                </div>
+                <div id="fact-stat-card" class="mt-4 pt-3 border-t border-slate-800 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-850 flex items-center justify-center text-cyan-400 font-mono text-xs border border-slate-800">206</div>
+                    <div class="text-[10px] text-slate-400">
+                        <strong class="text-slate-200">ชิ้นกระดูกรวม</strong> ในร่างผู้ใหญ่วัยเจริญเติบโตเต็มที่ ซึ่งแบ่งเป็นกระดูกแกน (Axial) และกระดูกรยางค์ (Appendicular)
+                    </div>
+                </div>
+            </div>
+
+            <!-- รายชื่อชิ้นส่วนกระดูกสำหรับการเล่นเกมลากวางหรือเรียนรู้ -->
+            <div class="p-4 flex-1">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ชิ้นส่วนคลังคำศัพท์กระดูก</h3>
+                    <span id="placed-counter" class="text-[10px] bg-slate-850 px-2 py-0.5 rounded text-slate-400">วางครบ 0 / 8 ชิ้น</span>
+                </div>
+                <div id="bone-palette" class="grid grid-cols-2 gap-2 max-h-[220px] md:max-h-none overflow-y-auto pr-1">
+                    <!-- รายการจะเรนเดอร์ออโต้ -->
+                </div>
+                <button id="btn-reset" class="w-full mt-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-900 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 3.56L18 7M7 9H4v3"></path></svg>
+                    รีเซ็ตบอร์ดกระดูกทั้งหมด
+                </button>
+            </div>
+            
+            <!-- เครดิตผู้พัฒนา -->
+            <div class="p-3 bg-slate-950 border-t border-slate-850 text-center text-[10px] text-slate-500">
+                วิชากายวิภาคศาสตร์และนวัตกรรมการเรียนรู้ดิจิทัล
+            </div>
+        </div>
+    </main>
+
+    <!-- หน้าต่างสรุปผลเมื่อจบเกมท้าทายเวลา (Modal) -->
+    <div id="success-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
+            
+            <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-white mb-1">ยินดีด้วยอย่างยิ่ง! 🎉</h2>
+            <p class="text-slate-400 text-xs mb-6">คุณจัดวางระบบโครงกระดูกหลักได้เสร็จสมบูรณ์และถูกต้องครบถ้วน!</p>
+            
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <span class="text-[10px] text-slate-500 uppercase">คะแนนการทดสอบ</span>
+                    <div id="modal-score" class="text-3xl font-extrabold text-cyan-400 mono">0</div>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-500 uppercase">เวลาที่ทำได้จริง</span>
+                    <div id="modal-time" class="text-3xl font-extrabold text-emerald-400 mono">00:00</div>
+                </div>
+            </div>
+
+            <p id="evaluation-text" class="text-xs text-slate-300 italic mb-6">"คุณประยุกต์ใช้นวัตกรรมการเรียนรู้และระบบกายวิภาคได้ยอดเยี่ยมที่สุด!"</p>
+
+            <div class="flex gap-3">
+                <button id="btn-modal-restart" class="flex-1 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-semibold py-2.5 rounded-lg text-xs hover:shadow-lg hover:shadow-cyan-900/50 transition">เริ่มท้าทายใหม่</button>
+                <button onclick="document.getElementById('success-modal').classList.add('hidden')" class="px-4 bg-slate-850 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg text-xs font-semibold transition">ปิด</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- โค้ดโปรแกรมการทำงานด้วย Javascript (AI + Logic) -->
+    <script>
+        // --- 1. ข้อมูลวิชาการกายวิภาค (Skeletal System Data) ---
+        const BONE_DATA = [
+            {
+                id: "skull",
+                nameTh: "กะโหลกศีรษะ",
+                nameEn: "Skull (Cranium)",
+                fact: "ปกป้องสมองอันประเสริฐ ประกอบด้วยกระดูกหลายชิ้นเชื่อมต่ออย่างมั่นคงถาวรด้วยรอยประสาน (Sutures)",
+                xRatio: 0.50,
+                yRatio: 0.14
+            },
+            {
+                id: "spine",
+                nameTh: "กระดูกสันหลัง",
+                nameEn: "Vertebral Column",
+                fact: "เสาแกนหลักของร่างกายเพื่อค้ำจุนการทรงตัว และเป็นอุโมงค์ปกป้องเส้นประสาทไขสันหลัง (Spinal Cord)",
+                xRatio: 0.50,
+                yRatio: 0.40
+            },
+            {
+                id: "ribs",
+                nameTh: "กระดูกซี่โครง",
+                nameEn: "Rib Cage (Thoracic)",
+                fact: "มี 12 คู่ ทำหน้าที่เปรียบดั่งตะกร้าเกราะป้องกันเพื่อปกป้องหัวใจและปอดอันอ่อนไหวภายในทรวงอก",
+                xRatio: 0.50,
+                yRatio: 0.31
+            },
+            {
+                id: "humerus",
+                nameTh: "กระดูกต้นแขน",
+                nameEn: "Humerus",
+                fact: "กระดูกท่อนเดี่ยวขนาดยาวบริเวณท่อนแขนบน เชื่อมต่อช่วงไหล่เข้ากับศอกเพื่อเอื้อต่อการแกว่งแขนอิสระ",
+                xRatio: 0.38,
+                yRatio: 0.35
+            },
+            {
+                id: "pelvis",
+                nameTh: "กระดูกสะโพกเชิงกราน",
+                nameEn: "Pelvis",
+                fact: "กระดูกโครงรูปชามใบใหญ่ที่ค้ำจุนน้ำหนักช่วงบน กระจายน้ำหนักลงสู่ขา และอุ้มอวัยวะภายในช่องท้องส่วนล่าง",
+                xRatio: 0.50,
+                yRatio: 0.53
+            },
+            {
+                id: "femur",
+                nameTh: "กระดูกต้นขา",
+                nameEn: "Femur",
+                fact: "กระดูกชิ้นที่ยาวที่สุด หนาแน่นและแข็งแรงที่สุดในขบวนกระดูกทั้งหมด เพื่อแบกรับการยืนและวิ่งกระโดด",
+                xRatio: 0.42,
+                yRatio: 0.69
+            },
+            {
+                id: "patella",
+                nameTh: "กระดูกสะบ้า",
+                nameEn: "Patella",
+                fact: "กระดูกรูปเหลี่ยมหัวใจแบนเล็กบริเวณหน้าข้อเข่า คอยปกป้องผ่อนผันหน้าเอ็นขาท่อนล่างขณะพับ",
+                xRatio: 0.42,
+                yRatio: 0.80
+            },
+            {
+                id: "tibia",
+                nameTh: "กระดูกหน้าแข้ง",
+                nameEn: "Tibia",
+                fact: "กระดูกแกนท่อนหลักหน้าแข้งขาล่าง ทำหน้าที่ต้านทานรับส่งน้ำหนักแรงส่งเคลื่อนไหวลงไปสู่ส้นเท้า",
+                xRatio: 0.43,
+                yRatio: 0.90
+            }
+        ];
+
+        // --- 2. การสร้างเสียงสังเคราะห์เชิงการศึกษา (Web Audio Synthesis) ---
+        class SoundEffects {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playGrab() {
+                this.init();
+                if (!this.ctx) return;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.1);
+            }
+            playCorrect() {
+                this.init();
+                if (!this.ctx) return;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, this.ctx.currentTime + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, this.ctx.currentTime + 0.16); // G5
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+            playIncorrect() {
+                this.init();
+                if (!this.ctx) return;
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, this.ctx.currentTime); // A3
+                osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+            playVictory() {
+                this.init();
+                if (!this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime + idx * 0.12);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.12 + 0.4);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.12);
+                    osc.stop(this.ctx.currentTime + idx * 0.12 + 0.4);
+                });
+            }
+        }
+        const sfx = new SoundEffects();
+
+        // --- 3. การวาดแบบจำลองโครงกระดูก (Human Skeleton Drawing using Paths) ---
+        function drawVectorSkeleton(ctx, centerX, width, height) {
+            ctx.save();
+            ctx.strokeStyle = "rgba(148, 163, 184, 0.45)"; 
+            ctx.lineWidth = 2.5;
+            ctx.fillStyle = "rgba(241, 245, 249, 0.85)"; 
+
+            // 1. หัวกะโหลก (Skull)
+            const headY = height * 0.14;
+            const headRadius = Math.min(width, height) * 0.05;
+            ctx.beginPath();
+            ctx.arc(centerX, headY - 10, headRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // ขากรรไกร (Jaw)
+            ctx.beginPath();
+            ctx.rect(centerX - headRadius*0.6, headY - 10 + headRadius*0.7, headRadius*1.2, headRadius*0.6);
+            ctx.fill();
+            ctx.stroke();
+
+            // 2. กระดูกกระดูกสันหลัง (Spine)
+            const spineTop = headY + headRadius*1.1;
+            const spineBottom = height * 0.53;
+            ctx.beginPath();
+            ctx.moveTo(centerX, spineTop);
+            ctx.lineTo(centerX, spineBottom);
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = "rgba(226, 232, 240, 0.75)";
+            ctx.stroke();
+            
+            // เพิ่มบ่วงกระดูกข้อสันหลังจำลอง
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "rgba(148, 163, 184, 0.4)";
+            for (let y = spineTop + 10; y < spineBottom; y += 12) {
+                ctx.beginPath();
+                ctx.moveTo(centerX - 12, y);
+                ctx.lineTo(centerX + 12, y);
+                ctx.stroke();
+            }
+
+            // 3. ซี่โครง (Rib Cage)
+            ctx.save();
+            ctx.lineWidth = 4.5;
+            ctx.strokeStyle = "rgba(226, 232, 240, 0.75)";
+            const ribCenterY = height * 0.31;
+            const ribWidth = Math.min(width, height) * 0.07;
+            for (let i = 0; i < 6; i++) {
+                let offY = i * 11;
+                ctx.beginPath();
+                ctx.arc(centerX - ribWidth/2, ribCenterY + offY, ribWidth/2, -Math.PI*0.5, Math.PI*0.4, true);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(centerX + ribWidth/2, ribCenterY + offY, ribWidth/2, -Math.PI*0.5, Math.PI*0.6, false);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 4. กระดูกเชิงกราน (Pelvis)
+            const pelvisY = spineBottom;
+            const pelvisW = Math.min(width, height) * 0.08;
+            ctx.beginPath();
+            ctx.ellipse(centerX, pelvisY, pelvisW, pelvisW * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 5. แขนด้านซ้ายและขวา
+            const shoulderY = headY + headRadius*1.3;
+            const shoulderW = Math.min(width, height) * 0.09;
+            const elbowY = height * 0.42;
+            const handY = height * 0.52;
+
+            ctx.lineWidth = 4;
+            // แขนขวาของผู้เล่น (ฝั่งซ้ายของจอ)
+            ctx.beginPath();
+            ctx.moveTo(centerX - shoulderW, shoulderY);
+            ctx.lineTo(centerX - shoulderW - 15, elbowY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX - shoulderW - 15, elbowY);
+            ctx.lineTo(centerX - shoulderW - 10, handY);
+            ctx.stroke();
+
+            // แขนซ้ายของผู้เล่น (ฝั่งขวาของจอ)
+            ctx.beginPath();
+            ctx.moveTo(centerX + shoulderW, shoulderY);
+            ctx.lineTo(centerX + shoulderW + 15, elbowY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX + shoulderW + 15, elbowY);
+            ctx.lineTo(centerX + shoulderW + 10, handY);
+            ctx.stroke();
+
+            // 6. ขาด้านซ้ายและขวา
+            const femurY = height * 0.69;
+            const kneeY = height * 0.80;
+            const ankleY = height * 0.94;
+            const legW = pelvisW * 0.6;
+
+            // ขาขวา
+            ctx.beginPath();
+            ctx.moveTo(centerX - legW, pelvisY);
+            ctx.lineTo(centerX - legW, kneeY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX - legW, kneeY, 5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX - legW, kneeY);
+            ctx.lineTo(centerX - legW, ankleY);
+            ctx.stroke();
+
+            // ขาซ้าย
+            ctx.beginPath();
+            ctx.moveTo(centerX + legW, pelvisY);
+            ctx.lineTo(centerX + legW, kneeY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX + legW, kneeY, 5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX + legW, kneeY);
+            ctx.lineTo(centerX + legW, ankleY);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // --- 4. การจัดการตัวแปรระบบและสเตตแอปพลิเคชัน ---
+        let inputMode = "AR"; 
+        let currentActivity = "STUDY"; 
+        
+        let score = 0;
+        let gameTimeLeft = 60; 
+        let gameActive = false;
+        let timerInterval = null;
+
+        let boneItems = []; 
+        let activeDraggedId = null; 
+
+        // พิกัดเคอร์เซอร์ตรวจจับ (ทั้งนิ้วมือ AR หรือเมาส์สัมผัส)
+        let cursorX = 0;
+        let cursorY = 0;
+        let isPinching = false; 
+
+        const videoElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('game-canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const paletteContainer = document.getElementById('bone-palette');
+        const placedCounterEl = document.getElementById('placed-counter');
+
+        const factTitle = document.getElementById('fact-title');
+        const factLatin = document.getElementById('fact-latin');
+        const factDesc = document.getElementById('fact-desc');
+
+        // --- 5. การจัดเรียงและกระจายป้ายคำศัพท์กระดูกแบบอัจฉริยะ (Responsive Safe-Placement) ---
+        function initBoneItems() {
+            const w = canvasElement.width || 800;
+            const h = canvasElement.height || 600;
+
+            boneItems = BONE_DATA.map((bone, index) => {
+                const isLeft = index % 2 === 0;
+                
+                // คำนวณขอบวางป้ายคำศัพท์ให้อยู่บนผืนภาพ Canvas เสมอ แม้หน้าจอจะแคบหรือโดนบีบย่อ
+                const startX = isLeft ? 10 + 65 : w - 10 - 65;
+                
+                // เฉลี่ยความสูง (Y) เพื่อไม่ให้ซ้อนทับกัน
+                const rowCount = Math.ceil(BONE_DATA.length / 2);
+                const rowIndex = Math.floor(index / 2);
+                const startY = 80 + (rowIndex * ((h - 160) / rowCount));
+
+                return {
+                    ...bone,
+                    currentX: startX,
+                    currentY: startY,
+                    isPlaced: false, 
+                    isHovered: false, // บ่งชี้ว่าเคอร์เซอร์แตะทับอยู่หรือไม่
+                    width: 130,
+                    height: 38
+                };
+            });
+            updateSidebarPalette();
+        }
+
+        function updateSidebarPalette() {
+            paletteContainer.innerHTML = '';
+            
+            boneItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `p-2.5 rounded-lg border text-left cursor-pointer transition flex flex-col justify-between ${
+                    item.isPlaced 
+                    ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' 
+                    : 'bg-slate-900 border-slate-800 hover:border-cyan-500/50 hover:bg-slate-850'
+                }`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold">${item.nameTh}</span>
+                        ${item.isPlaced ? '<span class="text-[9px] px-1.5 py-0.5 bg-emerald-500/25 text-emerald-400 rounded font-bold">✓ วางถูกต้อง</span>' : ''}
+                    </div>
+                    <span class="text-[10px] text-slate-400 italic">${item.nameEn}</span>
+                `;
+                
+                card.addEventListener('click', () => {
+                    showFactSheet(item);
+                });
+                paletteContainer.appendChild(card);
+            });
+
+            const placedCount = boneItems.filter(b => b.isPlaced).length;
+            placedCounterEl.innerText = `จัดวางได้สำเร็จ ${placedCount} / ${boneItems.length} ชิ้น`;
+        }
+
+        function showFactSheet(bone) {
+            factTitle.innerText = bone.nameTh;
+            factLatin.innerText = bone.nameEn;
+            factDesc.innerText = bone.fact;
+        }
+
+        // --- 6. ระบบลากวางด้วยเมาส์ / การสัมผัส (Mouse & Touch Controllers) ---
+        function addMouseListeners() {
+            const getCanvasPos = (e) => {
+                const rect = canvasElement.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    // คำนวณพิกัดให้แมตช์พอดีกับความหนาแน่นพิกเซลของ Canvas
+                    x: ((clientX - rect.left) / rect.width) * canvasElement.width,
+                    y: ((clientY - rect.top) / rect.height) * canvasElement.height
+                };
+            };
+
+            const handleStart = (e) => {
+                if (inputMode !== "MOUSE") return;
+                const pos = getCanvasPos(e);
+                cursorX = pos.x;
+                cursorY = pos.y;
+                isPinching = true;
+
+                for (let i = boneItems.length - 1; i >= 0; i--) {
+                    const item = boneItems[i];
+                    if (item.isPlaced) continue;
+
+                    if (cursorX >= item.currentX - item.width/2 && 
+                        cursorX <= item.currentX + item.width/2 &&
+                        cursorY >= item.currentY - item.height/2 && 
+                        cursorY <= item.currentY + item.height/2) {
+                        
+                        activeDraggedId = item.id;
+                        sfx.playGrab();
+                        break;
+                    }
+                }
+            };
+
+            const handleMove = (e) => {
+                if (inputMode !== "MOUSE") return;
+                const pos = getCanvasPos(e);
+                cursorX = pos.x;
+                cursorY = pos.y;
+
+                if (isPinching && activeDraggedId) {
+                    const item = boneItems.find(b => b.id === activeDraggedId);
+                    if (item) {
+                        item.currentX = cursorX;
+                        item.currentY = cursorY;
+                    }
+                }
+            };
+
+            const handleEnd = () => {
+                if (inputMode !== "MOUSE") return;
+                isPinching = false;
+                if (activeDraggedId) {
+                    checkTargetPlacement(activeDraggedId);
+                    activeDraggedId = null;
+                }
+            };
+
+            canvasElement.addEventListener('mousedown', handleStart);
+            canvasElement.addEventListener('mousemove', handleMove);
+            window.addEventListener('mouseup', handleEnd);
+
+            canvasElement.addEventListener('touchstart', handleStart, { passive: true });
+            canvasElement.addEventListener('touchmove', handleMove, { passive: true });
+            window.addEventListener('touchend', handleEnd);
+        }
+
+        // --- 7. การตรวจวัดความแม่นยำในการวางและการติดจุดอ้างอิง ---
+        function checkTargetPlacement(itemId) {
+            const item = boneItems.find(b => b.id === itemId);
+            if (!item) return;
+
+            const centerX = canvasElement.width / 2;
+            const targetX = centerX;
+            const targetY = canvasElement.height * item.yRatio;
+
+            // รัศมีเป้าหมายที่ยอมรับได้ว่าต่อตรงข้อต่อกระดูก (เพิ่มความกว้างเป็น 65 พิกเซลเพื่อการควบคุมที่ง่ายขึ้น)
+            const distance = Math.hypot(item.currentX - targetX, item.currentY - targetY);
+            const successThreshold = 65; 
+
+            if (distance < successThreshold) {
+                item.currentX = targetX;
+                item.currentY = targetY;
+                item.isPlaced = true;
+                
+                sfx.playCorrect();
+                showFactSheet(item);
+                updateSidebarPalette();
+
+                if (currentActivity === "GAME" && gameActive) {
+                    score += 100;
+                    document.getElementById('game-score').innerText = String(score).padStart(3, '0');
+                }
+
+                const allPlaced = boneItems.every(b => b.isPlaced);
+                if (allPlaced) {
+                    endGame(true);
+                }
+            } else {
+                // ลากไม่ตรงสปริงกลับตำแหน่งเดิมเพื่อความไม่ซ้อนกัน
+                sfx.playIncorrect();
+                resetCardPosition(item);
+            }
+        }
+
+        // รีเซ็ตการ์ดกลับจุดเริ่มต้นที่เหมาะสมของตนเอง
+        function resetCardPosition(item) {
+            const index = BONE_DATA.findIndex(b => b.id === item.id);
+            const isLeft = index % 2 === 0;
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+            const rowCount = Math.ceil(BONE_DATA.length / 2);
+            const rowIndex = Math.floor(index / 2);
+
+            item.currentX = isLeft ? 10 + 65 : w - 10 - 65;
+            item.currentY = 80 + (rowIndex * ((h - 160) / rowCount));
+        }
+
+        // --- 8. ตัวบริหารและคุมระดับเวลาของกิจกรรม ---
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!gameActive) return;
+                gameTimeLeft--;
+                
+                const minutes = Math.floor(gameTimeLeft / 60);
+                const seconds = gameTimeLeft % 60;
+                document.getElementById('game-timer').innerText = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                if (gameTimeLeft <= 0) {
+                    endGame(false);
+                }
+            }, 1000);
+        }
+
+        function endGame(isVictory) {
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            if (isVictory) {
+                sfx.playVictory();
+                document.getElementById('modal-score').innerText = score;
+                
+                const minutes = Math.floor(gameTimeLeft / 60);
+                const seconds = gameTimeLeft % 60;
+                document.getElementById('modal-time').innerText = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                let evalText = "";
+                if (gameTimeLeft > 35) {
+                    evalText = "วิเศษมาก! คุณคือศาสตราจารย์เกียรติคุณกายวิภาคศาสตร์ระบบกระดูก!";
+                } else if (gameTimeLeft > 15) {
+                    evalText = "ยอดเยี่ยม! คุณจำแนกพิกัดกระดูกมนุษย์ได้อย่างรวดเร็วและแม่นยำสูง";
+                } else {
+                    evalText = "ยินดีด้วย คุณผ่านการเรียนรู้! พยายามฝึกฝนความแม่นยำขึ้นต่อไปนะครับ";
+                }
+                document.getElementById('evaluation-text').innerText = `"${evalText}"`;
+                document.getElementById('success-modal').classList.remove('hidden');
+            } else {
+                alert("หมดเวลาเรียนการสอน! มาพยายามใหม่อีกครั้งเพื่อจดจำชิ้นส่วนกระดูกให้แม่นยำขึ้นนะ");
+                resetSession();
+            }
+        }
+
+        function resetSession() {
+            score = 0;
+            gameTimeLeft = 60;
+            document.getElementById('game-score').innerText = "000";
+            document.getElementById('game-timer').innerText = currentActivity === "GAME" ? "01:00" : "--:--";
+            document.getElementById('success-modal').classList.add('hidden');
+            initBoneItems();
+            
+            if (currentActivity === "GAME") {
+                gameActive = true;
+                startTimer();
+            } else {
+                gameActive = false;
+                clearInterval(timerInterval);
+            }
+        }
+
+        // --- 9. การตั้งค่าสลับโหมดการเล่น ---
+        document.getElementById('btn-mode-study').addEventListener('click', () => {
+            currentActivity = "STUDY";
+            document.getElementById('display-mode-tag').innerText = "🔬 โหมดเรียนรู้คำศัพท์";
+            document.getElementById('btn-mode-study').className = "py-2 px-3 rounded-lg text-xs font-semibold text-center border bg-cyan-950 border-cyan-500/50 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]";
+            document.getElementById('btn-mode-game').className = "py-2 px-3 rounded-lg text-xs font-semibold text-center border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200";
+            resetSession();
+        });
+
+        document.getElementById('btn-mode-game').addEventListener('click', () => {
+            currentActivity = "GAME";
+            document.getElementById('display-mode-tag').innerText = "🎮 เกมท้าทายเวลา";
+            document.getElementById('btn-mode-game').className = "py-2 px-3 rounded-lg text-xs font-semibold text-center border bg-cyan-950 border-cyan-500/50 text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.1)]";
+            document.getElementById('btn-mode-study').className = "py-2 px-3 rounded-lg text-xs font-semibold text-center border border-slate-800 bg-slate-950 text-slate-400 hover:text-slate-200";
+            resetSession();
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', resetSession);
+        document.getElementById('btn-modal-restart').addEventListener('click', resetSession);
+
+        const btnAR = document.getElementById('btn-ar-mode');
+        const btnMouse = document.getElementById('btn-mouse-mode');
+        const playGuide = document.getElementById('play-guide-overlay');
+
+        btnAR.addEventListener('click', () => {
+            inputMode = "AR";
+            btnAR.className = "px-3 py-1.5 rounded-md text-xs font-medium transition bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 flex items-center gap-1.5";
+            btnMouse.className = "px-3 py-1.5 rounded-md text-xs font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
+            playGuide.classList.remove('hidden');
+        });
+
+        btnMouse.addEventListener('click', () => {
+            inputMode = "MOUSE";
+            btnMouse.className = "px-3 py-1.5 rounded-md text-xs font-medium transition bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 flex items-center gap-1.5";
+            btnAR.className = "px-3 py-1.5 rounded-md text-xs font-medium transition text-slate-400 hover:text-white flex items-center gap-1.5";
+            playGuide.classList.add('hidden');
+        });
+
+        // --- 10. ระบบประมวลผลและการคำนวณข้อต่อนิ้ว AR (MediaPipe Hands Integration) ---
+        let handsAI = null;
+
+        function startMediaPipeTracking() {
+            handsAI = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+
+            handsAI.setOptions({
+                maxNumHands: 1, 
+                modelComplexity: 1,
+                minDetectionConfidence: 0.55,
+                minTrackingConfidence: 0.55
+            });
+
+            handsAI.onResults(onHandTrackingResults);
+
+            const cameraHelper = new Camera(videoElement, {
+                onFrame: async () => {
+                    if (inputMode === "AR") {
+                        await handsAI.send({ image: videoElement });
+                    } else {
+                        renderFrameWithoutAI();
+                    }
+                },
+                width: 640,
+                height: 480
+            });
+
+            cameraHelper.start()
+                .then(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                })
+                .catch(err => {
+                    console.warn("ไม่สามารถเปิดกล้องได้:", err);
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    document.getElementById('camera-error-toast').classList.remove('hidden');
+                    btnMouse.click();
+                    renderFrameWithoutAI();
+                });
+        }
+
+        // จัดแจงพิกัดภาพ และรันลูปตรวจจับเคอร์เซอร์
+        function onHandTrackingResults(results) {
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            // วาดภาพกล้องสลับด้านเพื่อให้ตรงตัวผู้เล่น
+            canvasCtx.translate(canvasElement.width, 0);
+            canvasCtx.scale(-1, 1);
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.restore();
+
+            const centerX = canvasElement.width / 2;
+            drawVectorSkeleton(canvasCtx, centerX, canvasElement.width, canvasElement.height);
+
+            // คำนวณความเคลื่อนไหวเมื่อพบเป้าหมายนิ้ว
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const handLandmarks = results.multiHandLandmarks[0];
+
+                const thumbTip = handLandmarks[4];
+                const indexTip = handLandmarks[8];
+
+                // แปลงพิกัดนิ้วให้สัมพันธ์กับกระจกเว็บบอร์ดแบบพอดีเป๊ะ
+                const realX = (1 - indexTip.x) * canvasElement.width;
+                const realY = indexTip.y * canvasElement.height;
+
+                cursorX = realX;
+                cursorY = realY;
+
+                // *** ปรับปรุงความแม่นยำ: ใช้ระยะขจัด 2D ตัดแกน Z ทิ้งเพื่อป้องกันการสั่นไหวที่พึ่งพาไม่ได้จากระบบเว็บแคม ***
+                const distanceBetweenTips = Math.hypot(
+                    thumbTip.x - indexTip.x,
+                    thumbTip.y - indexTip.y
+                );
+
+                // หากปลายนิ้วห่างกันน้อยกว่า 4.5% ของขนาดจอ = คำสั่งจีบ (Pinch)
+                const pinchThreshold = 0.045; 
+                
+                if (distanceBetweenTips < pinchThreshold) {
+                    if (!isPinching) {
+                        isPinching = true;
+                        
+                        // หยิบกระดูกเฉพาะชิ้นที่เคอร์เซอร์ชี้โดนอยู่จริงๆ
+                        for (let i = boneItems.length - 1; i >= 0; i--) {
+                            const item = boneItems[i];
+                            if (item.isPlaced) continue;
+
+                            if (cursorX >= item.currentX - item.width/2 && 
+                                cursorX <= item.currentX + item.width/2 &&
+                                cursorY >= item.currentY - item.height/2 && 
+                                cursorY <= item.currentY + item.height/2) {
+                                
+                                activeDraggedId = item.id;
+                                sfx.playGrab();
+                                break;
+                            }
+                        }
+                    }
+
+                    if (activeDraggedId) {
+                        const item = boneItems.find(b => b.id === activeDraggedId);
+                        if (item) {
+                            item.currentX = cursorX;
+                            item.currentY = cursorY;
+                        }
+                    }
+                } else {
+                    if (isPinching) {
+                        isPinching = false;
+                        if (activeDraggedId) {
+                            checkTargetPlacement(activeDraggedId);
+                            activeDraggedId = null;
+                        }
+                    }
+                }
+
+                // อัปเดตการตรวจจับ Hover แตะโดนเป้า
+                boneItems.forEach(item => {
+                    if (!item.isPlaced) {
+                        item.isHovered = (
+                            cursorX >= item.currentX - item.width/2 && 
+                            cursorX <= item.currentX + item.width/2 &&
+                            cursorY >= item.currentY - item.height/2 && 
+                            cursorY <= item.currentY + item.height/2
+                        );
+                    }
+                });
+
+                // วาดลายเส้นเชื่อมต่อกระดูกข้อมือ
+                drawVirtualHandSkeleton(canvasCtx, handLandmarks);
+            } else {
+                // หากไม่มีนิ้วในจอ ให้สถานะชี้ทับทั้งหมดเป็นเท็จ
+                boneItems.forEach(item => item.isHovered = false);
+            }
+
+            // วาดองค์ประกอบและเคอร์เซอร์เรืองแสงนำทาง
+            drawInteractiveItemsAndTargets();
+            drawGlowingCursor();
+        }
+
+        // กรณีกล้องไม่ทำงานหรืออยู่ในโหมดสัมผัส
+        function renderFrameWithoutAI() {
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                canvasCtx.translate(canvasElement.width, 0);
+                canvasCtx.scale(-1, 1);
+                canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.restore();
+            } else {
+                const grad = canvasCtx.createLinearGradient(0, 0, canvasElement.width, canvasElement.height);
+                grad.addColorStop(0, '#020617');
+                grad.addColorStop(1, '#0f172a');
+                canvasCtx.fillStyle = grad;
+                canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.restore();
+            }
+
+            const centerX = canvasElement.width / 2;
+            drawVectorSkeleton(canvasCtx, centerX, canvasElement.width, canvasElement.height);
+            
+            // อัปเดต Hover แตะเป้าป้ายสำหรับโหมดเมาส์ชี้
+            boneItems.forEach(item => {
+                if (!item.isPlaced) {
+                    item.isHovered = (
+                        cursorX >= item.currentX - item.width/2 && 
+                        cursorX <= item.currentX + item.width/2 &&
+                        cursorY >= item.currentY - item.height/2 && 
+                        cursorY <= item.currentY + item.height/2
+                    );
+                }
+            });
+
+            drawInteractiveItemsAndTargets();
+            drawGlowingCursor();
+
+            requestAnimationFrame(renderFrameWithoutAI);
+        }
+
+        // --- 11. ระบบจำลองและวาดป้ายคำศัพท์พร้อมเป้าสแกนร่วม ---
+        function drawInteractiveItemsAndTargets() {
+            const centerX = canvasElement.width / 2;
+
+            // วาดจุดกากบาทเป้าหมาย (Targets) บนโครงร่าง
+            boneItems.forEach(item => {
+                const targetX = centerX;
+                const targetY = canvasElement.height * item.yRatio;
+
+                canvasCtx.beginPath();
+                canvasCtx.arc(targetX, targetY, 15, 0, Math.PI * 2);
+                
+                if (item.isPlaced) {
+                    canvasCtx.fillStyle = "rgba(16, 185, 129, 0.35)";
+                    canvasCtx.fill();
+                    canvasCtx.strokeStyle = "#10b981";
+                    canvasCtx.lineWidth = 2.5;
+                } else {
+                    canvasCtx.fillStyle = "rgba(15, 23, 42, 0.75)";
+                    canvasCtx.fill();
+                    canvasCtx.strokeStyle = "rgba(34, 211, 238, 0.55)";
+                    canvasCtx.lineWidth = 1.5;
+                    
+                    canvasCtx.moveTo(targetX - 7, targetY);
+                    canvasCtx.lineTo(targetX + 7, targetY);
+                    canvasCtx.moveTo(targetX, targetY - 7);
+                    canvasCtx.lineTo(targetX, targetY + 7);
+                }
+                canvasCtx.stroke();
+            });
+
+            // วาดป้ายคำศัพท์แต่ละตัว
+            boneItems.forEach(item => {
+                canvasCtx.save();
+                
+                const isDragging = (item.id === activeDraggedId);
+                const x = item.currentX;
+                const y = item.currentY;
+                const w = item.width;
+                const h = item.height;
+
+                // ตรวจความตื่นตัว: หากเมาส์หรือปลายนิ้วชี้มาทับการ์ด ให้แสดงเงาเรืองแสงสีชมพูทันที!
+                if (item.isHovered && !item.isPlaced) {
+                    canvasCtx.shadowColor = "#f43f5e";
+                    canvasCtx.shadowBlur = 12;
+                } else if (isDragging) {
+                    canvasCtx.shadowColor = "#22d3ee";
+                    canvasCtx.shadowBlur = 18;
+                    canvasCtx.scale(1.05, 1.05);
+                }
+
+                const r = 8;
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(x - w/2 + r, y - h/2);
+                canvasCtx.lineTo(x + w/2 - r, y - h/2);
+                canvasCtx.arcTo(x + w/2, y - h/2, x + w/2, y + h/2, r);
+                canvasCtx.lineTo(x + w/2, y + h/2 - r);
+                canvasCtx.arcTo(x + w/2, y + h/2, x - w/2, y + h/2, r);
+                canvasCtx.lineTo(x - w/2 + r, y + h/2);
+                canvasCtx.arcTo(x - w/2, y + h/2, x - w/2, y - h/2, r);
+                canvasCtx.closePath();
+
+                // การสลับสีของป้ายกระดูกตามโต้ตอบ
+                if (item.isPlaced) {
+                    canvasCtx.fillStyle = "rgba(6, 78, 59, 0.9)"; 
+                    canvasCtx.strokeStyle = "#10b981";
+                    canvasCtx.lineWidth = 2;
+                } else if (isDragging) {
+                    canvasCtx.fillStyle = "rgba(21, 94, 117, 0.95)"; 
+                    canvasCtx.strokeStyle = "#22d3ee";
+                    canvasCtx.lineWidth = 2.5;
+                } else if (item.isHovered) {
+                    canvasCtx.fillStyle = "rgba(136, 19, 55, 0.9)"; // ชี้โดนเป็นสีชมพูแดงเร้าใจ
+                    canvasCtx.strokeStyle = "#f43f5e";
+                    canvasCtx.lineWidth = 2;
+                } else {
+                    canvasCtx.fillStyle = "rgba(15, 23, 42, 0.85)"; 
+                    canvasCtx.strokeStyle = "rgba(148, 163, 184, 0.45)";
+                    canvasCtx.lineWidth = 1.5;
+                }
+                
+                canvasCtx.fill();
+                canvasCtx.stroke();
+
+                // สัญญลักษณ์วงกลมขอบหน้าการ์ด
+                canvasCtx.beginPath();
+                canvasCtx.arc(x - w/2 + 15, y, 4, 0, Math.PI * 2);
+                canvasCtx.fillStyle = item.isPlaced ? "#34d399" : (isDragging ? "#67e8f9" : (item.isHovered ? "#fda4af" : "#94a3b8"));
+                canvasCtx.fill();
+
+                canvasCtx.font = "bold 12.5px 'Kanit'";
+                canvasCtx.fillStyle = item.isPlaced ? "#a7f3d0" : "#ffffff";
+                canvasCtx.textAlign = "left";
+                canvasCtx.textBaseline = "middle";
+                canvasCtx.fillText(item.nameTh, x - w/2 + 26, y - 5);
+
+                canvasCtx.font = "italic 9px 'Share Tech Mono'";
+                canvasCtx.fillStyle = item.isPlaced ? "#34d399" : (item.isHovered ? "#f43f5e" : "#94a3b8");
+                canvasCtx.fillText(item.nameEn, x - w/2 + 26, y + 8);
+
+                canvasCtx.restore();
+            });
+        }
+
+        // --- 12. ฟังก์ชันวาดเป้าเล็งวงกลมเรืองแสงสีฟ้านำทาง (The Cursor Reticle) ---
+        // ฟังก์ชันสำคัญที่จะช่วยให้ผู้ใช้งานมองเห็นเป้าชี้จากข้อต่อนิ้วตนเอง เล็งตรงจุด 100%
+        function drawGlowingCursor() {
+            if (cursorX === 0 && cursorY === 0) return;
+
+            canvasCtx.save();
+            // วาดเป้าวงใน
+            canvasCtx.beginPath();
+            canvasCtx.arc(cursorX, cursorY, isPinching ? 6 : 9, 0, Math.PI * 2);
+            canvasCtx.fillStyle = isPinching ? "rgba(16, 185, 129, 0.75)" : "rgba(34, 211, 238, 0.55)";
+            canvasCtx.fill();
+            canvasCtx.strokeStyle = isPinching ? "#10b981" : "#22d3ee";
+            canvasCtx.lineWidth = 2.5;
+            canvasCtx.stroke();
+
+            // วาดวงพัลส์วงนอก Sci-Fi
+            canvasCtx.beginPath();
+            canvasCtx.arc(cursorX, cursorY, isPinching ? 13 : 18, 0, Math.PI * 2);
+            canvasCtx.strokeStyle = isPinching ? "rgba(16, 185, 129, 0.4)" : "rgba(34, 211, 238, 0.25)";
+            canvasCtx.lineWidth = 1.5;
+            canvasCtx.setLineDash([4, 4]); // เส้นเป้าเป็นปุ่มขีดไข่ปลาสุดล้ำ
+            canvasCtx.stroke();
+            canvasCtx.restore();
+        }
+
+        // วาดข้อเชื่อมต่อนิ้วจำลอง (Hand skeleton wires)
+        function drawVirtualHandSkeleton(ctx, landmarks) {
+            ctx.save();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "rgba(244, 63, 94, 0.75)"; 
+
+            const fingerConnections = [
+                [0, 1, 2, 3, 4],       // โป้ง
+                [0, 5, 6, 7, 8],       // ชี้
+                [5, 9, 13, 17],        
+                [0, 17, 18, 19, 20],   // ก้อย
+                [9, 10, 11, 12],       // กลาง
+                [13, 14, 15, 16]       // นาง
+            ];
+
+            fingerConnections.forEach(chain => {
+                ctx.beginPath();
+                for (let i = 0; i < chain.length; i++) {
+                    const id = chain[i];
+                    const pt = landmarks[id];
+                    const pxX = (1 - pt.x) * canvasElement.width;
+                    const pxY = pt.y * canvasElement.height;
+                    
+                    if (i === 0) ctx.moveTo(pxX, pxY);
+                    else ctx.lineTo(pxX, pxY);
+                }
+                ctx.stroke();
+            });
+
+            landmarks.forEach((pt, idx) => {
+                const pxX = (1 - pt.x) * canvasElement.width;
+                const pxY = pt.y * canvasElement.height;
+
+                ctx.beginPath();
+                ctx.arc(pxX, pxY, idx === 8 || idx === 4 ? 6 : 3.5, 0, Math.PI * 2);
+                
+                if (idx === 8 || idx === 4) {
+                    ctx.fillStyle = isPinching ? "#10b981" : "#f43f5e";
+                } else {
+                    ctx.fillStyle = "#ffffff";
+                }
+                ctx.fill();
+                ctx.strokeStyle = "rgba(15, 23, 42, 1)";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+
+            ctx.restore();
+        }
+
+        // --- 13. ปรับขนาด Responsive เพื่อให้พอดีกรอบอย่างสมบูรณ์ ---
+        function handleResize() {
+            const container = canvasElement.parentElement;
+            canvasElement.width = container.clientWidth;
+            canvasElement.height = container.clientHeight;
+            
+            boneItems.forEach((item, index) => {
+                if (item.isPlaced) {
+                    item.currentX = canvasElement.width / 2;
+                    item.currentY = canvasElement.height * item.yRatio;
+                } else {
+                    // หากปรับปรุงหน้าต่าง ดึงแผ่นป้ายคำศัพท์ให้อยู่ในขอบมองเห็นอย่างสัดส่วน
+                    const isLeft = index % 2 === 0;
+                    const w = canvasElement.width;
+                    const h = canvasElement.height;
+                    const startX = isLeft ? 10 + 65 : w - 10 - 65;
+                    const rowCount = Math.ceil(BONE_DATA.length / 2);
+                    const rowIndex = Math.floor(index / 2);
+                    
+                    item.currentX = startX;
+                    item.currentY = 80 + (rowIndex * ((h - 160) / rowCount));
+                }
+            });
+        }
+
+        // --- 14. ทำงานเมื่อระบบหน้าต่างตื่น ---
+        window.onload = function() {
+            handleResize();
+            window.addEventListener('resize', handleResize);
+            
+            initBoneItems();
+            addMouseListeners();
+            
+            startMediaPipeTracking();
+        };
+
+    </script>
+</body>
+</html>
