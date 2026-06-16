@@ -71,7 +71,7 @@
             <button id="btn-ar-mode" class="px-2.5 py-1.5 rounded bg-cyan-950 border border-cyan-500/30 text-xs font-semibold text-cyan-400 transition hover:bg-cyan-900/40">
                 📷 โหมดกล้อง AR
             </button>
-            <button id="btn-mouse-mode" class="px-2.5 py-1.5 rounded bg-slate-800 text-xs font-semibold text-slate-300 transition hover:bg-slate-750">
+            <button id="btn-mouse-mode" class="px-2.5 py-1.5 rounded bg-slate-800 text-xs font-semibold text-slate-300 transition hover:bg-slate-700">
                 🖱️ โหมดเมาส์ / สัมผัส
             </button>
         </div>
@@ -119,7 +119,7 @@
 
                 <!-- มิติตัวแปรแทรกซ้อน (Motor / Technical Metrics) -->
                 <div class="flex-1 bg-slate-900/95 border border-fuchsia-500/30 rounded-lg p-2.5 backdrop-blur shadow-lg">
-                    <span class="text-[9px] uppercase bg-fuchsia-500/20 text-fuchsia-400 font-bold px-1.5 py-0.5 rounded">มิต้านการควบคุมและการลากวาง (Motor Performance)</span>
+                    <span class="text-[9px] uppercase bg-fuchsia-500/20 text-fuchsia-400 font-bold px-1.5 py-0.5 rounded">มิติด้านการควบคุมและการลากวาง (Motor Performance)</span>
                     <div class="grid grid-cols-2 gap-2 mt-1.5 text-xs">
                         <div>
                             <span class="text-[9px] text-slate-400 block">ทำป้ายหลุดมือ/กล้องคลาดเคลื่อน</span>
@@ -133,7 +133,7 @@
                 </div>
             </div>
 
-            <!-- ข้อความแนะนำปรับเทียบเบื้องต้น -->
+            <!-- ข้อความแนะนำปรับเทียบเบื้องต้น (พร้อมปุ่มข้ามทันที) -->
             <div id="calibration-alert" class="absolute inset-x-6 top-1/3 bg-teal-950/90 border border-teal-500 rounded-xl p-5 text-center shadow-2xl backdrop-blur max-w-md mx-auto z-20">
                 <div class="w-12 h-12 bg-teal-900/50 rounded-full flex items-center justify-center text-teal-400 mx-auto mb-3">
                     <svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -142,7 +142,12 @@
                 <p class="text-xs text-slate-300 leading-relaxed mb-4">
                     เพื่อประโยชน์ในการวิจัย ระบบต้องจับเวลาการลากวางขั้นพื้นฐานของนักศึกษา โดยให้นักศึกษาหยิบป้าย **"CALIBRATION BLOCK"** สีส้มขวามือ ลากไปวางที่เป้าหมายตรงกลางหน้าอกโครงร่างร่างกายก่อนเริ่มกรณีศึกษาจริงครับ
                 </p>
-                <div class="text-[10px] text-teal-400">ระบบพร้อมใช้งานแล้ว สามารถสแกนมือเพื่อลากได้ทันที</div>
+                <div class="flex flex-col gap-2">
+                    <button id="btn-skip-calibration" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition duration-150">
+                        ⚡ เข้าสู่กรณีศึกษาจริงทันที (ข้ามขั้นตอนปรับเทียบ)
+                    </button>
+                    <div class="text-[10px] text-teal-400">หรือสามารถใช้มือลากป้ายสีส้มทางขวาไปที่อกเพื่อปรับเทียบจริง</div>
+                </div>
             </div>
 
             <!-- กล่องแจ้งเตือนกล้องขัดข้อง (Camera Access Fallback UI) -->
@@ -290,7 +295,6 @@
     <!-- โค้ดกลไกควบคุมและประมวลผลทั้งหมดด้วยภาษา JavaScript -->
     <script>
         // --- 1. การสร้างสไตล์เสียงเอฟเฟกต์เชิงการแพทย์ ---
-        // ปรับปรุง: ย้ายประกาศฟังก์ชันโครงสร้าง SoundEffects ขึ้นมาด้านบนสุดก่อนที่จะถูกเรียกใช้งาน (แก้บั๊ก SoundEffects is not defined)
         function SoundEffects() {
             this.ctx = null;
             this.init = function() {
@@ -449,7 +453,7 @@
                 title: "เคสที่ 4: การประเมินจุดฉีดยากล้ามเนื้อสะโพกปลอดภัย (Ventrogluteal Site)",
                 scenario: "คนไข้รับคำสั่งฉีดยาฆ่าเชื้อขนาด 2.5 mL เข้ากล้ามเนื้อลึก พยาบาลต้องการเลือกจุด 'Ventrogluteal Site' เพื่อลดความเสี่ยงแทงเข็มทะลุเส้นประสาทและเส้นเลือดใหญ่ที่ก้น โดยพยาบาลต้องกางนิ้วชี้ทาบขอบยอดปีกกระดูกเชิงกรานชิ้นใดในกายวิภาคศาสตร์เพื่อเล็ง?",
                 targetId: "pelvis_crest",
-                guideline: "ให้นักศึกษาลาก 'ปีกเชิงกราน (Iliac Crest)' มาวางเพื่อระบุพิกัดเป้าแลนด์มาร์กในการทาบนนิ้วมือเล็งฉีดยา"
+                guideline: "ให้นักศึกษาลาก 'ปีกเชิงกราน (Iliac Crest)' มาวางเพื่อระบุพิกัดเป้าแลนด์มาร์กในการทาบนิ้วมือเล็งฉีดยา"
             },
             {
                 id: "case_im_pediatric",
@@ -468,7 +472,6 @@
         ];
 
         // --- 3.5 ฟังก์ชันสำหรับการวาดแบบจำลองโครงร่างอนาโตมิกชั้นสูง (Detailed Skeletal Draw) ---
-        // ปรับปรุง: กู้คืนและติดตั้งฟังก์ชัน drawVectorSkeleton กลับคืนสู่ระบบเพื่อแก้ไข ReferenceError
         function drawVectorSkeleton(ctx, centerX, width, height) {
             ctx.save();
             ctx.strokeStyle = "rgba(100, 116, 139, 0.4)";
@@ -550,6 +553,7 @@
 
             // 6. แขนด้านซ้ายและขวา (Humerus)
             const elbowY = height * 0.43;
+            const handY = height * 0.53;
             ctx.lineWidth = 5;
             ctx.strokeStyle = "rgba(226, 232, 240, 0.85)";
             // ข้างซ้ายของหน้าจอ (แขนขวา)
@@ -835,21 +839,6 @@
         function updateStats() {
             const accuracy = totalAttempts > 0 ? Math.round((successfulMatches / totalAttempts) * 100) : 0;
             
-            // เพิ่มการตรวจสอบ Null-checks เพื่อแก้ปัญหาสติถิ HTML หายไป
-            const statAccuracy = document.getElementById('stat-accuracy');
-            if (statAccuracy) statAccuracy.innerText = `${accuracy}%`;
-            
-            const statErrors = document.getElementById('stat-errors');
-            if (statErrors) statErrors.innerText = `${totalErrors} ครั้ง`;
-            
-            const duration = Math.floor((Date.now() - startTime) / 1000);
-            const statDuration = document.getElementById('stat-duration');
-            if (statDuration) statDuration.innerText = `${duration}s`;
-        }
-
-        function updateStatsDisplay() {
-            const accuracy = totalAttempts > 0 ? Math.round((successfulMatches / totalAttempts) * 100) : 0;
-            
             // อัปเดตสถิติมิติ Cognitive
             const cognitiveErrors = document.getElementById('metric-cognitive-errors');
             if (cognitiveErrors) cognitiveErrors.innerText = `${totalCognitiveErrors} ครั้ง`;
@@ -903,7 +892,6 @@
         setInterval(() => {
             if (activeCaseIndex < CLINICAL_CASES.length) {
                 updateStats();
-                updateStatsDisplay(); // ซิงโครไนซ์บอร์ดหลัก
             }
         }, 1000);
 
