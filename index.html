@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnatoAR Clinical B.S.N. Research Dashboard</title>
+    <title>AnatoAR Clinical Research Dashboard</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts for Medical Display -->
@@ -102,25 +102,25 @@
             </div>
 
             <!-- กล่องแสดงตัวชี้วัดสถิติพฤติกรรมเรียลไทม์ (Research Metrics Telemetry) -->
-    <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
-        <div class="bg-slate-900/95 border border-slate-800 rounded-lg p-3 grid grid-cols-3 gap-4 min-w-[280px]">
-            <div>
-                <span class="text-[9px] text-slate-400 uppercase block">อัตราตอบถูก</span>
-                <span id="stat-accuracy" class="text-lg font-bold text-emerald-400 mono leading-none">0%</span>
-            </div>
-            <div class="border-l border-slate-800 pl-3">
-                <span class="text-[9px] text-slate-400 uppercase block">ทำพลาดสะสม</span>
-                <span id="stat-errors" class="text-lg font-bold text-rose-400 mono leading-none">0 ครั้ง</span>
-            </div>
-            <div class="border-l border-slate-800 pl-3">
-                <span class="text-[9px] text-slate-400 uppercase block">ระยะเวลารวม</span>
-                <span id="stat-duration" class="text-lg font-bold text-cyan-400 mono leading-none">0s</span>
+            <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                <div class="bg-slate-900/95 border border-slate-800 rounded-lg p-3 grid grid-cols-3 gap-4 min-w-[280px]">
+                    <div>
+                        <span class="text-[9px] text-slate-400 uppercase block">อัตราตอบถูก</span>
+                        <span id="stat-accuracy" class="text-lg font-bold text-emerald-400 mono leading-none">0%</span>
+                    </div>
+                    <div class="border-l border-slate-800 pl-3">
+                        <span class="text-[9px] text-slate-400 uppercase block">ทำพลาดสะสม</span>
+                        <span id="stat-errors" class="text-lg font-bold text-rose-400 mono leading-none">0 ครั้ง</span>
+                    </div>
+                    <div class="border-l border-slate-800 pl-3">
+                        <span class="text-[9px] text-slate-400 uppercase block">ระยะเวลารวม</span>
+                        <span id="stat-duration" class="text-lg font-bold text-cyan-400 mono leading-none">0s</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- ส่วนที่ 2: แผงประเมินผลทางการพยาบาลเชิงวิชาการ (ฝั่งขวา) -->
+        <!-- ส่วนที่ 2: แผงประเมินผลทางการพยาบาลเชิงวิชาการ (ฝั่งขวา) -->
         <div class="w-full lg:w-[410px] bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 z-10 overflow-y-auto">
             
             <!-- สเตจวิเคราะห์กรณีศึกษา (Nursing Case Scenario) -->
@@ -347,58 +347,10 @@
             }
         ];
 
-        // --- 2. การสังเคราะห์เสียงแจ้งเตือน Web Audio API ---
-        class SoundEffects {
-            constructor() { this.ctx = null; }
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-            playGrab() {
-                this.init(); if (!this.ctx) return;
-                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                osc.type = 'sine'; osc.frequency.setValueAtTime(350, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.15);
-                g.gain.setValueAtTime(0.08, this.ctx.currentTime);
-                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.15);
-            }
-            playCorrect() {
-                this.init(); if (!this.ctx) return;
-                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(523, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.08);
-                osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.16);
-                g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.35);
-            }
-            playIncorrect() {
-                this.init(); if (!this.ctx) return;
-                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(90, this.ctx.currentTime + 0.3);
-                g.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-                osc.connect(g); g.connect(this.ctx.destination);
-                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
-            }
-            playVictory() {
-                this.init(); if (!this.ctx) return;
-                const notes = [523, 659, 784, 1046];
-                notes.forEach((freq, idx) => {
-                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.15);
-                    g.gain.setValueAtTime(0.1, this.ctx.currentTime + idx * 0.15);
-                    g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.15 + 0.4);
-                    osc.connect(g); g.connect(this.ctx.destination);
-                    osc.start(this.ctx.currentTime + idx * 0.15);
-                    osc.stop(this.ctx.currentTime + idx * 0.15 + 0.4);
-                });
-            }
-        }
+        // --- 2. การสร้างเสียงสังเคราะห์ Web Audio API ---
         const sfx = new SoundEffects();
 
-        // --- 3. ตัวแปรเก็บประวัติการทำวิจัยและสเตตัสด้านเรียลไทม์ (Research Telemetry State) ---
+        // --- 3. ตัวแปรเก็บสถิตินักศึกษา (Research Telemetry State) ---
         let researchLogs = []; 
         let startTime = Date.now();
         let totalAttempts = 0;
@@ -413,8 +365,9 @@
         let cursorX = 0;
         let cursorY = 0;
         let isPinching = false;
+        let isHandDetected = false;
+        let handLandmarks = null;
         
-        // ตัวแปรเก็บค่าตำแหน่งเยื้องหยิบจับ เพื่อความละเอียดสมจริงในการลาก (Offset Dragging Variables)
         let grabOffsetX = 0;
         let grabOffsetY = 0;
 
@@ -564,7 +517,61 @@
             ctx.restore();
         }
 
-        // --- 5. การกระจายป้ายคำศัพท์และกำหนดพิกัดความละเอียดหน้าจอ ---
+        // --- 5. การสร้างสไตล์เสียงเอฟเฟกต์เชิงการแพทย์ ---
+        function SoundEffects() {
+            this.ctx = null;
+            this.init = function() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            };
+            this.playGrab = function() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(350, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.15);
+                g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.15);
+            };
+            this.playCorrect = function() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(523, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(659, this.ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(784, this.ctx.currentTime + 0.16);
+                g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.35);
+            };
+            this.playIncorrect = function() {
+                this.init(); if (!this.ctx) return;
+                let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(90, this.ctx.currentTime + 0.3);
+                g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(g); g.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+            };
+            this.playVictory = function() {
+                this.init(); if (!this.ctx) return;
+                const notes = [523, 659, 784, 1046];
+                notes.forEach((freq, idx) => {
+                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.15);
+                    g.gain.setValueAtTime(0.1, this.ctx.currentTime + idx * 0.15);
+                    g.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.15 + 0.4);
+                    osc.connect(g); g.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.15);
+                    osc.stop(this.ctx.currentTime + idx * 0.15 + 0.4);
+                });
+            };
+        }
+
+        // --- 6. การกระจายป้ายคำศัพท์และกำหนดพิกัดความละเอียดหน้าจอ ---
         function initBoneItems() {
             const w = canvasElement.width || 800;
             const h = canvasElement.height || 600;
@@ -640,7 +647,7 @@
             placedCounterEl.innerText = `${placedCount} / ${CLINICAL_CASES.length} ชิ้นที่ตอบถูก`;
         }
 
-        // --- 6. ระบบวิเคราะห์พฤติกรรมการตอบกลับและตรวจสอบแลนด์มาร์ก ---
+        // --- 7. ระบบวิเคราะห์พฤติกรรมการตอบกลับและตรวจสอบแลนด์มาร์ก ---
         function checkTargetPlacement(itemId) {
             const currentCase = CLINICAL_CASES[activeCaseIndex];
             const item = boneItems.find(b => b.id === itemId);
@@ -707,7 +714,7 @@
             item.currentY = 85 + (rowIndex * ((h - 170) / rowCount));
         }
 
-        // --- 7. การเก็บบันทึกสถิติเพื่อส่งออกผลงานวิจัย ---
+        // --- 8. การเก็บบันทึกสถิติเพื่อส่งออกผลงานวิจัย ---
         function logResearchAction(caseId, selectedBoneId, result, attemptNumber) {
             const durationSinceStart = Math.floor((Date.now() - startTime) / 1000);
             
@@ -845,7 +852,6 @@
                         cursorY <= item.currentY + item.height/2) {
                         
                         activeDraggedId = item.id;
-                        // คำนวณตําแหน่ง Offset เมาส์ เพื่อไม่ให้แผ่นกระดาษกระตุกเข้าหาศูนย์กลางอย่างกะทันหัน
                         grabOffsetX = item.currentX - cursorX;
                         grabOffsetY = item.currentY - cursorY;
                         sfx.playGrab();
@@ -908,8 +914,6 @@
                 onFrame: async () => {
                     if (inputMode === "AR") {
                         await handsAI.send({ image: videoElement });
-                    } else {
-                        renderFrameWithoutAI();
                     }
                 },
                 width: 640,
@@ -919,38 +923,35 @@
             cameraHelper.start()
                 .then(() => {
                     document.getElementById('loading-screen').classList.add('hidden');
+                    // เริ่มต้น Render Loop หลอมรวมเสถียรภาพภาพ
+                    renderLoop();
                 })
                 .catch(err => {
                     console.warn("ไม่ได้รับอนุมัติใช้งานกล้องถ่ายรูป:", err);
                     document.getElementById('loading-screen').classList.add('hidden');
                     btnMouse.click();
-                    renderFrameWithoutAI();
+                    renderLoop();
                 });
         }
 
+        // ส่วนของการรับค่าการเคลื่อนไหวเพื่อคำนวณตำแหน่ง (Data-Only Processor)
         function onHandTrackingResults(results) {
-            canvasCtx.save();
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            
-            canvasCtx.translate(canvasElement.width, 0);
-            canvasCtx.scale(-1, 1);
-            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-            canvasCtx.restore();
-
-            const centerX = canvasElement.width / 2;
-            drawVectorSkeleton(canvasCtx, centerX, canvasElement.width, canvasElement.height);
+            if (inputMode !== "AR") {
+                isHandDetected = false;
+                return;
+            }
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                const handLandmarks = results.multiHandLandmarks[0];
+                isHandDetected = true;
+                handLandmarks = results.multiHandLandmarks[0];
 
-                // หาค่าเฉลี่ยขนาดมือโดยอ้างอิงระยะห่างจากข้อมือ (0) ไปจนถึงโคนนิ้วกลาง (9) เพื่อปรับความเสถียรไร้ขีดจำกัดเรื่องระยะห่างกล้อง
                 const wrist = handLandmarks[0];
                 const middleMCP = handLandmarks[9];
                 const handScale = Math.hypot(wrist.x - middleMCP.x, wrist.y - middleMCP.y);
 
                 const thumbTip = handLandmarks[4];
                 const indexTip = handLandmarks[8];
-                const middleTip = handLandmarks[12]; // เพิ่มนิ้วกลางสำหรับช่วยหนีบจับทางเลือกให้เป็นธรรมชาติขึ้น (Tripod Grab)
+                const middleTip = handLandmarks[12]; 
 
                 const realX = (1 - indexTip.x) * canvasElement.width;
                 const realY = indexTip.y * canvasElement.height;
@@ -958,13 +959,11 @@
                 cursorX = realX;
                 cursorY = realY;
 
-                // คำนวณระยะจีบนิ้วแบบ 2D ที่เสถียรสูงสุด โดยปรับฐานเทียบเทียบกับอัตราส่วนขนาดมือ (Hand Scale Calibration)
                 const indexThumbDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y) / handScale;
                 const middleThumbDist = Math.hypot(thumbTip.x - middleTip.x, thumbTip.y - middleTip.y) / handScale;
 
-                // นำเอาระบบหน่วงความสั่นไหว (Hysteresis/Schmitt Trigger) มาใช้เพื่อป้องกันแผ่นป้ายกระตุกร่วงลงมาอย่างไร้ระเบียบ
-                const startPinchThreshold = 0.28;  // บีบนิ้วชิดเป็นพิเศษเพื่อเริ่มต้นคีบ
-                const releasePinchThreshold = 0.42; // ยอมผ่อนปรนนิ้วได้กว้างขึ้นเมื่อถือแผ่นเคลื่อนไหวอยู่
+                const startPinchThreshold = 0.28;  
+                const releasePinchThreshold = 0.42; 
 
                 const isCurrentlyPinching = (indexThumbDist < (isPinching ? releasePinchThreshold : startPinchThreshold)) || 
                                              (middleThumbDist < (isPinching ? releasePinchThreshold : startPinchThreshold));
@@ -983,7 +982,6 @@
                                 cursorY <= item.currentY + item.height/2) {
                                 
                                 activeDraggedId = item.id;
-                                // คำนวณจุดคีบชดเชยที่ถูกต้อง (Grab Offset Compensation) แผ่นป้ายจะไม่กระชากเข้าศูนย์กลางนิ้วทันที
                                 grabOffsetX = item.currentX - cursorX;
                                 grabOffsetY = item.currentY - cursorY;
                                 sfx.playGrab();
@@ -995,7 +993,6 @@
                     if (activeDraggedId) {
                         const item = boneItems.find(b => b.id === activeDraggedId);
                         if (item) {
-                            // การจัดวางสมดุลแผ่นป้ายลากตามนิ้วอย่างเนียนสมบูรณ์
                             item.currentX = cursorX + grabOffsetX;
                             item.currentY = cursorY + grabOffsetY;
                         }
@@ -1009,48 +1006,33 @@
                         }
                     }
                 }
-
-                boneItems.forEach(item => {
-                    if (!item.isPlaced) {
-                        item.isHovered = (
-                            cursorX >= item.currentX - item.width/2 && 
-                            cursorX <= item.currentX + item.width/2 &&
-                            cursorY >= item.currentY - item.height/2 && 
-                            cursorY <= item.currentY + item.height/2
-                        );
-                    }
-                });
-
-                drawVirtualHandSkeleton(canvasCtx, handLandmarks);
             } else {
-                boneItems.forEach(item => item.isHovered = false);
+                isHandDetected = false;
+                handLandmarks = null;
             }
-
-            drawInteractiveItemsAndTargets();
-            drawGlowingCursor();
         }
 
-        function renderFrameWithoutAI() {
+        // --- 11. สุดยอด Master Render Loop สลายอาการค้าง หน่วง และหน่วยความจำพุ่งกระฉูด ---
+        function renderLoop() {
             canvasCtx.save();
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            
+
+            // 1. วาดเบื้องหลัง (Webcam หรือ ไล่สี Gradient)
             if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
                 canvasCtx.translate(canvasElement.width, 0);
                 canvasCtx.scale(-1, 1);
                 canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
                 canvasCtx.restore();
+                canvasCtx.save();
             } else {
                 const grad = canvasCtx.createLinearGradient(0, 0, canvasElement.width, canvasElement.height);
                 grad.addColorStop(0, '#020617');
                 grad.addColorStop(1, '#0b1329');
                 canvasCtx.fillStyle = grad;
                 canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-                canvasCtx.restore();
             }
 
-            const centerX = canvasElement.width / 2;
-            drawVectorSkeleton(canvasCtx, centerX, canvasElement.width, canvasElement.height);
-            
+            // 2. ตรวจจับสถานะการวาง Hover เป้าหมาย
             boneItems.forEach(item => {
                 if (!item.isPlaced) {
                     item.isHovered = (
@@ -1062,13 +1044,27 @@
                 }
             });
 
+            // 3. วาดโครงร่างร่างกระดูก
+            const centerX = canvasElement.width / 2;
+            drawVectorSkeleton(canvasCtx, centerX, canvasElement.width, canvasElement.height);
+
+            // 4. วาดโครงสร้งข้อมือ AR ในจอภาพ
+            if (inputMode === "AR" && isHandDetected && handLandmarks) {
+                drawVirtualHandSkeleton(canvasCtx, handLandmarks);
+            }
+
+            // 5. วาดองค์ประกอบแผ่นบอร์ดและเป้าหมายระบุหัตถการ
             drawInteractiveItemsAndTargets();
+
+            // 6. วาดเป้านำวิถีเรืองแสง
             drawGlowingCursor();
 
-            requestAnimationFrame(renderFrameWithoutAI);
+            canvasCtx.restore();
+            // วิ่งลูปสม่ำเสมอเป็นมาตรฐานเดี่ยว ลื่นไหล 60 FPS ไร้อาการหลุดร่วง
+            requestAnimationFrame(renderLoop);
         }
 
-        // --- 11. การจัดวาดกราฟิกแผ่นป้ายและเป้าเล็งวงกลมบน Canvas ---
+        // --- 12. การจัดวาดกราฟิกแผ่นป้ายและเป้าเล็งวงกลมบน Canvas ---
         function drawInteractiveItemsAndTargets() {
             const centerX = canvasElement.width / 2;
             const currentCase = CLINICAL_CASES[activeCaseIndex];
@@ -1223,7 +1219,7 @@
             fingerConnections.forEach(chain => {
                 ctx.beginPath();
                 for (let i = 0; i < chain.length; i++) {
-                    const id = chain[id] || chain[i];
+                    const id = chain[i]; // แก้ไขปัญหา ReferenceError ที่เคยเกิดขึ้น ณ จุดนี้
                     const pt = landmarks[id];
                     const pxX = (1 - pt.x) * canvasElement.width;
                     const pxY = pt.y * canvasElement.height;
